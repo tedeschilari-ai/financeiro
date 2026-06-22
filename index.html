@@ -1917,6 +1917,18 @@ async function loadFromFirestore(uid) {
       Object.keys(master).forEach(k => delete master[k]);
       Object.assign(master, mData);
       localStorage.setItem(V4_INDEX_KEY, JSON.stringify(master));
+    } else {
+      // Novo usuário sem dados — limpa localStorage e começa do zero
+      const newId = Math.random().toString(36).slice(2,10)+Date.now().toString(36);
+      const freshMaster = {contas:[{id:newId,nome:'Minha conta',emoji:'💼',cor:'#6366f1'}],contaAtiva:newId};
+      Object.keys(master).forEach(k => delete master[k]);
+      Object.assign(master, freshMaster);
+      localStorage.setItem(V4_INDEX_KEY, JSON.stringify(freshMaster));
+      const freshState = defaultState();
+      Object.keys(state).forEach(k => delete state[k]);
+      Object.assign(state, freshState);
+      localStorage.setItem(V4_DATA_PREFIX + newId, JSON.stringify(freshState));
+      return;
     }
     for (const conta of master.contas) {
       const aDoc = await ref.doc('account_' + conta.id).get();
