@@ -2174,8 +2174,14 @@ function bindMobileActions(){
 }
 function init(){populateFilters();bindTabs();bindMobileActions();
   // Tour de onboarding — só na primeira vez que a pessoa criou a conta
+  // (ou ao abrir o dashboard com ?tour na URL para testar)
+  if (new URLSearchParams(location.search).has('tour')) {
+    localStorage.removeItem(TOUR_KEY);
+  }
   if (localStorage.getItem('dash_tour_pending')) {
     localStorage.removeItem('dash_tour_pending');
+    setTimeout(startTour, 900);
+  } else if (new URLSearchParams(location.search).has('tour')) {
     setTimeout(startTour, 900);
   }
   document.getElementById('btnAdd').onclick=handleAddMain;
