@@ -115,7 +115,7 @@
   /* tbl-fixed: colgroup com larguras fixas compartilhadas entre as tabelas de fixas/variáveis
      de uma mesma seção, garantindo que as colunas fiquem sempre alinhadas entre elas.
      width fixo (em vez de 100%) evita que a coluna Descrição estique demais em telas largas. */
-  .table-main.tbl-fixed{table-layout:fixed;width:1076px;max-width:none}
+  .table-main.tbl-fixed{table-layout:fixed;width:100%;min-width:940px;max-width:1250px}
   .table-main.tbl-fixed th:last-child{padding-left:6px;padding-right:14px}
   .table-main.tbl-fixed td,.table-main.tbl-fixed th{vertical-align:middle;overflow:hidden;text-overflow:ellipsis}
   .table-main.tbl-fixed td:nth-child(2),.table-main.tbl-fixed th:nth-child(2){white-space:nowrap}
@@ -1555,7 +1555,7 @@ function renderEntradas(){
 // Colgroup compartilhado entre a tabela de fixas e a de variáveis de uma mesma seção
 // (mesma largura sempre = colunas ficam alinhadas entre os dois grupos)
 function _tblColgroupHTML(){
-  return `<colgroup><col style="width:32px"><col style="width:108px"><col style="width:220px"><col class="col-categoria" style="width:150px"><col class="col-subcategoria" style="width:150px"><col class="col-parcela" style="width:100px"><col style="width:118px"><col style="width:108px"><col style="width:90px"></colgroup>`;
+  return `<colgroup><col style="width:32px"><col style="width:108px"><col><col class="col-categoria" style="width:150px"><col class="col-subcategoria" style="width:150px"><col class="col-parcela" style="width:100px"><col style="width:118px"><col style="width:108px"><col style="width:90px"></colgroup>`;
 }
 function tabelaEntradas(items,isFixa){
   const tipo='entradas';const sel=_rowSel.entradas;
