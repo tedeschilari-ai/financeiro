@@ -48,6 +48,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   html{scroll-behavior:smooth;}
   body{
     margin:0;
+    padding-top:44px;
     font-family:'Inter',system-ui,-apple-system,sans-serif;
     color:var(--blue-900);
     background:var(--white);
@@ -59,6 +60,18 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   section{padding:80px 0;}
   h1,h2,h3{line-height:1.15;margin:0;font-weight:800;}
   p{margin:0;}
+
+  .top-bar{
+    position:fixed;top:0;left:0;right:0;
+    background:var(--red);
+    color:#fff;
+    text-align:center;
+    padding:10px 16px;
+    font-size:13.5px;
+    font-weight:700;
+    line-height:1.4;
+    z-index:1000;
+  }
 
   .btn{
     display:inline-flex;align-items:center;justify-content:center;gap:8px;
@@ -264,7 +277,35 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   footer a{color:#c6d5f7;font-weight:600;}
   footer a:hover{text-decoration:underline;}
 
+  .social-proof{
+    position:fixed;bottom:20px;left:20px;right:auto;
+    background:#fff;border-radius:14px;
+    box-shadow:0 16px 40px -12px rgba(11,29,58,0.35);
+    padding:14px 16px;display:flex;align-items:center;gap:12px;
+    max-width:300px;
+    border:1px solid #e6edfb;
+    transform:translateY(24px);opacity:0;pointer-events:none;
+    transition:transform .4s ease, opacity .4s ease;
+    z-index:900;
+  }
+  .social-proof.show{transform:translateY(0);opacity:1;}
+  .social-proof .avatar{
+    flex:none;width:38px;height:38px;border-radius:50%;
+    background:var(--blue-100);color:var(--blue-600);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:13px;
+  }
+  .social-proof .sp-text{font-size:13px;color:var(--blue-900);line-height:1.4;}
+  .social-proof .sp-name{font-weight:700;}
+  .social-proof .sp-time{font-size:11px;color:var(--gray-500);margin-top:2px;}
+  .social-proof .sp-close{
+    margin-left:auto;flex:none;background:none;border:none;
+    color:var(--gray-500);font-size:16px;cursor:pointer;padding:0 0 0 6px;line-height:1;
+  }
+
   @media (max-width:860px){
+    body{padding-top:56px;}
+    .top-bar{font-size:12.5px;padding:10px 12px;}
     section{padding:56px 0;}
     .hero .wrap, .product .wrap, .pain-split .wrap{grid-template-columns:1fr;}
     .product .wrap{gap:36px;}
@@ -285,10 +326,14 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
     }
     .hero-cta{flex-direction:column;align-items:center;}
     .imagine-list, .check-grid, .no-list, .benefit-card{text-align:left;}
+
+    .social-proof{left:12px;bottom:12px;max-width:260px;padding:12px 14px;}
   }
 </style>
 </head>
 <body>
+
+  <div class="top-bar">🔥 Oferta de lançamento ativa por tempo indeterminado, garanta o valor promocional antes que ele suba</div>
 
   <header class="hero">
     <div class="wrap">
@@ -382,8 +427,8 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
       </div>
       <div class="benefit-grid">
         <div class="benefit-card">
-          <span class="check">📥</span>
-          <div><h3>Importação inteligente de extratos e faturas</h3><p>Sem digitar movimento por movimento, importe o extrato ou a fatura em poucos cliques.</p></div>
+          <span class="check">🔒</span>
+          <div><h3>Importação segura, sem conectar ao seu banco</h3><p>Você mesma importa o extrato ou a fatura, em poucos cliques. Nunca pedimos login, senha ou acesso à sua conta bancária, seus dados ficam sempre no seu controle.</p></div>
         </div>
         <div class="benefit-card">
           <span class="check">👤</span>
@@ -496,7 +541,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
         <div class="once">pagamento único, sem mensalidade</div>
         <div class="guarantee">🛡️ Garantia incondicional de 7 dias</div>
         <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn btn-primary">→ Quero meu Dashboard Financeiro</a>
-        <div class="under">🔒 Seus dados ficam seguros e criptografados na nuvem</div>
+        <div class="under">🔒 Não conectamos ao seu banco. Você importa os extratos manualmente, e seus dados ficam seguros e sob seu controle</div>
       </div>
     </div>
   </section>
@@ -519,6 +564,66 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
       </span>
     </div>
   </footer>
+
+  <div class="social-proof" id="social-proof">
+    <div class="avatar" id="sp-avatar">MG</div>
+    <div class="sp-text">
+      <span class="sp-name" id="sp-name">Mariana G.</span> acabou de adquirir o Dashboard Financeiro!
+      <div class="sp-time" id="sp-time">agora mesmo</div>
+    </div>
+    <button class="sp-close" id="sp-close" aria-label="Fechar">×</button>
+  </div>
+
+  <script>
+    (function(){
+      var names = ["Mariana G.","Carlos R.","Fernanda S.","Juliana M.","Rafael A.","Patrícia L.","Bruno C.","Camila F.","Diego P.","Larissa T.","Eduardo N.","Beatriz O.","Thiago V.","Amanda K.","Gustavo B.","Vanessa D.","Rodrigo H.","Priscila Q.","Marcelo J.","Aline W.","Renata P.","Felipe M.","Débora S.","Leonardo C.","Natália B."];
+      var times = ["agora mesmo","há 1 minuto","há 2 minutos","há 4 minutos","há 6 minutos","há 9 minutos"];
+      var el = document.getElementById('social-proof');
+      var nameEl = document.getElementById('sp-name');
+      var avatarEl = document.getElementById('sp-avatar');
+      var timeEl = document.getElementById('sp-time');
+      var closeBtn = document.getElementById('sp-close');
+      var dismissedByUser = false;
+      var hideTimeout = null;
+
+      function initials(name){
+        var parts = name.split(' ');
+        return (parts[0] ? parts[0][0] : '') + (parts[1] ? parts[1][0] : '');
+      }
+
+      function showNotification(){
+        if(dismissedByUser) return;
+        var name = names[Math.floor(Math.random()*names.length)];
+        var time = times[Math.floor(Math.random()*times.length)];
+        nameEl.textContent = name;
+        avatarEl.textContent = initials(name);
+        timeEl.textContent = time;
+        el.classList.add('show');
+        clearTimeout(hideTimeout);
+        hideTimeout = setTimeout(function(){
+          el.classList.remove('show');
+        }, 5000);
+      }
+
+      function scheduleNext(){
+        var delay = 9000 + Math.random()*13000;
+        setTimeout(function(){
+          showNotification();
+          scheduleNext();
+        }, delay);
+      }
+
+      closeBtn.addEventListener('click', function(){
+        dismissedByUser = true;
+        el.classList.remove('show');
+      });
+
+      setTimeout(function(){
+        showNotification();
+        scheduleNext();
+      }, 4000);
+    })();
+  </script>
 
 </body>
 </html>
