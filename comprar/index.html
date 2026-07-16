@@ -48,7 +48,6 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   html{scroll-behavior:smooth;}
   body{
     margin:0;
-    padding-top:44px;
     font-family:'Inter',system-ui,-apple-system,sans-serif;
     color:var(--blue-900);
     background:var(--white);
@@ -62,7 +61,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   p{margin:0;}
 
   .top-bar{
-    position:fixed;top:0;left:0;right:0;
+    position:sticky;top:0;left:0;right:0;
     background:var(--red);
     color:#fff;
     text-align:center;
@@ -304,7 +303,6 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   }
 
   @media (max-width:860px){
-    body{padding-top:56px;}
     .top-bar{font-size:12.5px;padding:10px 12px;}
     section{padding:56px 0;}
     .hero .wrap, .product .wrap, .pain-split .wrap{grid-template-columns:1fr;}
