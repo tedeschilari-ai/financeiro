@@ -380,6 +380,10 @@
   .cat-list .cat{display:inline-flex;align-items:center;gap:6px;background:var(--bg-2);border:1px solid var(--border);padding:5px 10px;border-radius:999px;font-size:12px;color:var(--text)}
   .cat-list .cat button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:14px;line-height:1;padding:0}
   .cat-list .cat button:hover{color:var(--danger)}
+  .cat-list-v{display:flex;flex-direction:column;margin-top:6px;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:var(--bg-2)}
+  .cat-list-v .cat-row:last-child{border-bottom:none}
+  .cat-list-v .cat-row button{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:2px 4px}
+  .cat-list-v .cat-row button:hover{color:var(--danger)}
   .add-cat{display:flex;gap:6px;margin-top:8px}
   .add-cat input{flex:1}
   .preview-table{max-height:60vh;overflow:auto;border:1px solid var(--border);border-radius:10px;margin-top:10px}
@@ -781,11 +785,15 @@
     .venc-txt{display:none}
     .venc-dot{display:inline-block}
   }
-  /* esconder colunas via classe no container da lista */
-  #entradasList.hide-categoria .col-categoria,#debitoList.hide-categoria .col-categoria,#creditoList.hide-categoria .col-categoria{display:none}
-  #entradasList.hide-subcategoria .col-subcategoria,#debitoList.hide-subcategoria .col-subcategoria,#creditoList.hide-subcategoria .col-subcategoria{display:none}
-  #entradasList.hide-parcela .col-parcela,#debitoList.hide-parcela .col-parcela,#creditoList.hide-parcela .col-parcela{display:none}
-  #entradasList.hide-contabancaria .col-contabancaria,#debitoList.hide-contabancaria .col-contabancaria,#creditoList.hide-contabancaria .col-contabancaria{display:none}
+  /* esconder colunas via classe no container da lista — SÓ pra conteúdo que não é uma coluna
+     inteira (observação/vencimento são um texto/tag dentro da célula Descrição). Colunas de
+     verdade (categoria/subcategoria/parcela/conta bancária) são escondidas lá em cima via
+     visibility:collapse no <col> — tinha uma regra duplicada aqui embaixo usando display:none
+     direto no <td>, e ter as DUAS regras ativas ao mesmo tempo pra mesma coluna é o que causava
+     o bug relatado (tabela de Despesas aparecendo mais estreita/desalinhada às vezes): o <col>
+     reservava a largura mas a <td> some da linha, descasando a contagem de células com a do
+     colgroup. Removida a duplicata — agora só existe UMA regra por coluna.
+  */
   #entradasList.hide-observacao .row-obs,#debitoList.hide-observacao .row-obs,#creditoList.hide-observacao .row-obs{display:none}
   #debitoList.hide-vencimento .venc-tag,#creditoList.hide-vencimento .venc-tag{display:none}
 </style>
@@ -967,7 +975,7 @@
   <section class="tab-panel active" data-panel="dashboard">
   <section class="kpis">
     <div class="kpi saldo">
-      <div class="top"><h3>Saldo em conta agora</h3><div class="ico" id="kpiSaldoIcon">&#128179;</div></div>
+      <div class="top"><h3 id="kpiSaldoTitle">Saldo em conta agora</h3><div class="ico" id="kpiSaldoIcon">&#128179;</div></div>
       <div class="val" id="kpiSaldo">R$ 0,00</div>
       <div class="delta" id="kpiSaldoSub">Considera apenas lançamentos pagos</div>
     </div>
@@ -1037,6 +1045,19 @@
     <div class="card" style="grid-column:1/-1">
       <h2 id="chartResumoTitle" style="margin:0 0 4px">Resumo do período <span class="hint">entradas e despesas por tipo</span></h2>
       <div class="chart-box tall"><canvas id="chartResumoPeriodo"></canvas></div>
+    </div>
+  </section>
+  <section class="grid">
+    <div class="card" style="grid-column:1/-1">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px;flex-wrap:wrap">
+        <h2 style="margin:0" id="chartMetasTitle">Teto de gasto por categoria</h2>
+        <div class="view-toggle" id="metasTipoToggle">
+          <button type="button" data-metatipo="despesa" class="active" onclick="setMetasTipo('despesa')">Despesas</button>
+          <button type="button" data-metatipo="entrada" onclick="setMetasTipo('entrada')">Entradas</button>
+        </div>
+      </div>
+      <div class="chart-box tall"><canvas id="chartMetas"></canvas></div>
+      <div class="hint" id="chartMetasEmpty" style="display:none;padding:8px 2px 0">Defina um teto de gasto (ou meta de ganho) por categoria em Configurações pra ver esse gráfico aqui.</div>
     </div>
   </section>
   </section>
@@ -1190,9 +1211,38 @@
 const V4_INDEX_KEY='dashboardFinanceiro_v4_index';
 const V4_DATA_PREFIX='dashboardFinanceiro_v4_data_';
 const LEGACY_V3_KEY='dashboardFinanceiro_v3';
+// Guarda qual foi o ÚLTIMO uid do Firebase que logou NESTE navegador. master/state (a lista de
+// perfis e os dados financeiros) ficam salvos no localStorage SEM nenhum namespace por conta —
+// são só "o que está aberto nesse navegador agora". Isso é seguro enquanto é sempre a MESMA
+// pessoa logando ali, mas gerava um vazamento sério quando duas contas diferentes (ex: a admin
+// e uma conta de teste) logavam no mesmo navegador: ao logar numa conta nova que ainda não tinha
+// nada salvo no Firestore, o app "generosamente" pegava o que sobrou no localStorage da conta
+// ANTERIOR (achando que era rascunho local não sincronizado) e subia isso pro Firestore da conta
+// nova — clonando os dados de uma pessoa pra outra. Ver limparCacheLocalSeTrocouDeConta().
+const LAST_UID_KEY='dashboardFinanceiro_v4_last_uid';
+function limparCacheLocalSeTrocouDeConta(uidLogado){
+  const lastUid=localStorage.getItem(LAST_UID_KEY);
+  if(lastUid===uidLogado)return; // mesma pessoa de sempre nesse navegador — nada a fazer
+  // Apaga o cache local de TODOS os perfis da conta anterior (não só o ativo)
+  try{
+    const raw=localStorage.getItem(V4_INDEX_KEY);
+    const old=raw?JSON.parse(raw):null;
+    if(old&&old.contas)old.contas.forEach(c=>{localStorage.removeItem(V4_DATA_PREFIX+c.id);localStorage.removeItem('df_ts_'+c.id);});
+  }catch(e){console.error(e);}
+  localStorage.removeItem(V4_INDEX_KEY);
+  // Recria master/state do zero em memória (nunca reaproveita o que sobrou de outra conta)
+  const novoId=window.uid();
+  const novoMaster={contas:[{id:novoId,nome:'Minha conta',emoji:'💼',cor:'#6366f1'}],contaAtiva:novoId};
+  Object.keys(master).forEach(k=>delete master[k]);Object.assign(master,novoMaster);
+  localStorage.setItem(V4_INDEX_KEY,JSON.stringify(master));
+  const novoState=defaultState();
+  Object.keys(state).forEach(k=>delete state[k]);Object.assign(state,novoState);
+  localStorage.setItem(V4_DATA_PREFIX+novoId,JSON.stringify(state));
+  localStorage.setItem(LAST_UID_KEY,uidLogado);
+}
 const CATS_ENT_DEFAULT=['Projeto','Mensalidade aluno','Curso','Consultoria','Investimento','Outros'];
 const CATS_DESP_DEFAULT=['Moradia','Alimentação','Transporte','Contas','Marketing','Ferramentas/Software','Lazer','Saúde','Educação','Impostos','Outros'];
-function defaultState(){return{config:{nome:'',moeda:'R$',metaMensal:0,saldoInicial:0,grad:'verde',_gradV2:true,dark:false,fotoPerfil:'',categoriasEntradas:[...CATS_ENT_DEFAULT],categoriasDespesas:[...CATS_DESP_DEFAULT],coresCategoria:{},subcategorias:{}},entradas:[],despesas:[],prolabore:[],metas:[],contasBancarias:[],investimentos:[],confirmaTotais:{},confirmaGrupos:{},faturaPagamento:{},notifDismissed:[]};}
+function defaultState(){return{config:{nome:'',moeda:'R$',metaMensal:0,saldoInicial:0,grad:'verde',_gradV2:true,dark:false,fotoPerfil:'',categoriasEntradas:[...CATS_ENT_DEFAULT],categoriasDespesas:[...CATS_DESP_DEFAULT],coresCategoria:{},subcategorias:{},metaCategoriaDespesa:{},metaCategoriaEntrada:{}},entradas:[],despesas:[],prolabore:[],metas:[],contasBancarias:[],investimentos:[],confirmaTotais:{},confirmaGrupos:{},faturaPagamento:{},notifDismissed:[]};}
 function normEntrada(e){return{...e,fixa:!!e.fixa,pagos:e.pagos||{},pagosParcelas:e.pagosParcelas||{},valoresMes:e.valoresMes||{}};}
 // Reforça a regra em qualquer dado carregado (perfil salvo, restaurar backup, migração de conta
 // antiga): despesa no crédito é sempre "Cartão de crédito"; despesa em qualquer outro tipo nunca é.
@@ -1213,7 +1263,7 @@ function sanitizeState(s){const d=defaultState();const sc=s.config||{};
   // pessoa pode trocar de tema livremente pelo seletor e a escolha dela é respeitada.
   const _gradMigrated=!!sc._gradV2;
   const _grad=_gradMigrated?(sc.grad||d.config.grad):d.config.grad;
-  const out={config:{...d.config,...sc,dark:_dark,grad:_grad,_gradV2:true,coresCategoria:{...(sc.coresCategoria||{})},subcategorias:{...(sc.subcategorias||{})}},entradas:(s.entradas||[]).map(normEntrada),despesas:(s.despesas||[]).map(normDespesa),prolabore:s.prolabore||[],metas:s.metas||[],contasBancarias:s.contasBancarias||[],investimentos:s.investimentos||[],confirmaTotais:s.confirmaTotais||{},confirmaGrupos:s.confirmaGrupos||{},faturaPagamento:s.faturaPagamento||{},notifDismissed:s.notifDismissed||[]};if(s.despesasFixas&&s.despesasFixas.length){s.despesasFixas.forEach(f=>{out.despesas.push({id:f.id||uid(),descricao:f.nome||'Fixa',valor:Number(f.valor),data:f.ativoDesde||todayISO(),tipo:f.tipo||'credito',categoria:f.categoria||'Outros',parcelas:1,fixa:true,diaVencimento:f.diaVencimento||10,pagos:f.pagos||{},pagosParcelas:{}});});}return out;}
+  const out={config:{...d.config,...sc,dark:_dark,grad:_grad,_gradV2:true,coresCategoria:{...(sc.coresCategoria||{})},subcategorias:{...(sc.subcategorias||{})},metaCategoriaDespesa:{...(sc.metaCategoriaDespesa||{})},metaCategoriaEntrada:{...(sc.metaCategoriaEntrada||{})}},entradas:(s.entradas||[]).map(normEntrada),despesas:(s.despesas||[]).map(normDespesa),prolabore:s.prolabore||[],metas:s.metas||[],contasBancarias:s.contasBancarias||[],investimentos:s.investimentos||[],confirmaTotais:s.confirmaTotais||{},confirmaGrupos:s.confirmaGrupos||{},faturaPagamento:s.faturaPagamento||{},notifDismissed:s.notifDismissed||[]};if(s.despesasFixas&&s.despesasFixas.length){s.despesasFixas.forEach(f=>{out.despesas.push({id:f.id||uid(),descricao:f.nome||'Fixa',valor:Number(f.valor),data:f.ativoDesde||todayISO(),tipo:f.tipo||'credito',categoria:f.categoria||'Outros',parcelas:1,fixa:true,diaVencimento:f.diaVencimento||10,pagos:f.pagos||{},pagosParcelas:{}});});}return out;}
 function loadMaster(){try{const raw=localStorage.getItem(V4_INDEX_KEY);if(raw){const m=JSON.parse(raw);if(m&&m.contas&&m.contas.length)return m;}}catch(e){console.error(e);}
   // Migração v3 → v4: se houver dados antigos, cria conta padrão "Studio Tedeschi"
   const legacy=localStorage.getItem(LEGACY_V3_KEY)||localStorage.getItem('dashboardFinanceiro_v2')||localStorage.getItem('dashboardFinanceiro_v1');
@@ -1662,26 +1712,47 @@ function renderKPIs(){
   const receitaTotal=somaEntradasPeriodo(false);const receitaPaga=somaEntradasPeriodo(true);
   const despTotal=somaDespesasPeriodo(false)+somaProLaborePeriodo(false);const despPaga=somaDespesasPeriodo(true)+somaProLaborePeriodo(true);
   const lucro=receitaPaga-despPaga;const meta=metaMensalAtual();
-  document.getElementById('kpiSaldo').textContent=fmtMoney(saldoEmConta());
-  // Sub-texto: "Saldo inicial" no primeiro mês; "Saldo anterior" nos meses seguintes
+  // Saldo: se o filtro está no mês/ano ATUAL (o "hoje" de verdade), mostra o saldo real da conta
+  // agora mesmo. Se a pessoa navega pra um período diferente (mês anterior, ano anterior, etc.),
+  // o card vira "Saldo no final do período" — o quanto a conta tinha acumulado (saldo inicial +
+  // entradas pagas − despesas pagas − investido) até o ÚLTIMO DIA daquele período específico. É a
+  // mesma fórmula do "saldo agora", só que "congelada" numa data diferente — por isso o valor muda
+  // de verdade conforme você navega pelos meses, em vez de sempre mostrar o saldo de hoje.
   (()=>{
-    const saldoIni=saldoInicialTotal();
-    if(currentView==='anual'){
-      document.getElementById('kpiSaldoSub').textContent=saldoIni?`Saldo inicial: ${fmtMoney(saldoIni)}`:'Configure o saldo inicial em Configurações';
-      return;
-    }
-    const firstMk=primeiraMesComDados();
-    const curMk=mkOf(currentYear,currentMonth);
-    const isFirst=!firstMk||curMk<=firstMk;
-    if(isFirst){
-      document.getElementById('kpiSaldoSub').textContent=saldoIni?`Saldo inicial: ${fmtMoney(saldoIni)}`:'Configure o saldo inicial em Configurações';
+    const hoje=new Date();
+    const ehPeriodoAtual=currentView==='anual'
+      ?(currentYear===hoje.getFullYear())
+      :(currentYear===hoje.getFullYear()&&currentMonth===(hoje.getMonth()+1));
+    const titleEl=document.getElementById('kpiSaldoTitle');
+    if(ehPeriodoAtual){
+      if(titleEl)titleEl.textContent='Saldo em conta agora';
+      document.getElementById('kpiSaldo').textContent=fmtMoney(saldoEmConta());
+      // Sub-texto: "Saldo inicial" no primeiro mês; "Saldo anterior" nos meses seguintes
+      const saldoIni=saldoInicialTotal();
+      if(currentView==='anual'){
+        document.getElementById('kpiSaldoSub').textContent=saldoIni?`Saldo inicial: ${fmtMoney(saldoIni)}`:'Configure o saldo inicial em Configurações';
+        return;
+      }
+      const firstMk=primeiraMesComDados();
+      const curMk=mkOf(currentYear,currentMonth);
+      const isFirst=!firstMk||curMk<=firstMk;
+      if(isFirst){
+        document.getElementById('kpiSaldoSub').textContent=saldoIni?`Saldo inicial: ${fmtMoney(saldoIni)}`:'Configure o saldo inicial em Configurações';
+      } else {
+        // Calcular saldo ao final do mês anterior
+        const prevM=currentMonth===1?12:currentMonth-1;
+        const prevY=currentMonth===1?currentYear-1:currentYear;
+        const endPrev=`${prevY}-${String(prevM).padStart(2,'0')}-31`;
+        const saldoAnt=saldoAteDataInclusive(endPrev);
+        document.getElementById('kpiSaldoSub').textContent=`${MESES[prevM-1]} ${prevY}: ${fmtMoney(saldoAnt)}`;
+      }
     } else {
-      // Calcular saldo ao final do mês anterior
-      const prevM=currentMonth===1?12:currentMonth-1;
-      const prevY=currentMonth===1?currentYear-1:currentYear;
-      const endPrev=`${prevY}-${String(prevM).padStart(2,'0')}-31`;
-      const saldoAnt=saldoAteDataInclusive(endPrev);
-      document.getElementById('kpiSaldoSub').textContent=`${MESES[prevM-1]} ${prevY}: ${fmtMoney(saldoAnt)}`;
+      if(titleEl)titleEl.textContent='Saldo no final do período';
+      const endSel=currentView==='anual'?`${currentYear}-12-31`:`${currentYear}-${String(currentMonth).padStart(2,'0')}-31`;
+      const saldoFinal=saldoAteDataInclusive(endSel);
+      document.getElementById('kpiSaldo').textContent=fmtMoney(saldoFinal);
+      const rotuloPeriodo=currentView==='anual'?`dez/${currentYear}`:`${MESES_CURTO[currentMonth-1]}/${currentYear}`;
+      document.getElementById('kpiSaldoSub').textContent=`Entradas − despesas − investido até ${rotuloPeriodo}`;
     }
   })();
   document.getElementById('kpiReceita').textContent=fmtMoney(receitaPaga);
@@ -1731,7 +1802,13 @@ function investidoNoPeriodo(){
 }
 
 // ============ CHARTS ============
-let chartLine,chartPie,chartBar,chartDonut,chartResumoPeriodo;
+let chartLine,chartPie,chartBar,chartDonut,chartResumoPeriodo,chartMetas;
+let metasChartTipo='despesa';
+function setMetasTipo(tipo){
+  metasChartTipo=tipo;
+  document.querySelectorAll('#metasTipoToggle button').forEach(b=>b.classList.toggle('active',b.dataset.metatipo===tipo));
+  renderCharts();
+}
 // Resumo do período: quebra o que entrou e o que saiu no mês/ano filtrado em fixo, variável e,
 // pras despesas de cartão, uma barra POR FATURA (uma por conta/cartão com fatura no período) —
 // assim dá pra ver de cara "de onde" vem cada parte do total, sem precisar comparar dois meses.
@@ -1839,6 +1916,36 @@ function renderCharts(){
   chartResumoPeriodo=new Chart(document.getElementById('chartResumoPeriodo'),{type:'bar',data:{labels:temResumo?resumoLabels:['Sem dados no período'],datasets:[
     {label:'Valor',data:temResumo?resumoValores:[0],backgroundColor:temResumo?resumoCores:['#e2e8f0'],borderRadius:6,maxBarThickness:26}
   ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...coResumo.plugins.tooltip,callbacks:{label:c=>c.dataset.label+': '+fmtMoney(c.parsed.x)}}},scales:{x:{ticks:{color:coResumo.scales.x.ticks.color,font:{size:11},callback:v=>'R$ '+Number(v).toLocaleString('pt-BR')},grid:{color:coResumo.scales.y.grid.color},border:{display:false}},y:{ticks:{color:coResumo.scales.x.ticks.color,font:{size:11}},grid:{display:false},border:{display:false}}}}});
+  // ─── Teto de gasto (despesas) / Meta de ganho (entradas) por categoria ───
+  // Um gráfico só, com um toggle Despesas/Entradas (igual ao filtro dos donuts acima) em vez de
+  // 2 gráficos separados. teto/meta é sempre um valor MENSAL guardado em config; na visão "anual"
+  // ele é multiplicado por 12 pra comparar com o total do ano (o valor realizado já vem certo,
+  // porque byCatAllD/byCatEAll acima já respeitam currentView). Só entram no gráfico as categorias
+  // que a pessoa efetivamente configurou um teto/meta (>0) — sem isso, mostra um aviso.
+  if(chartMetas)chartMetas.destroy();
+  {
+    const isDespesa=metasChartTipo!=='entrada';
+    const metasMap=isDespesa?(state.config.metaCategoriaDespesa||{}):(state.config.metaCategoriaEntrada||{});
+    const valoresPeriodo=isDespesa?byCatAllD:byCatEAll;
+    const multiplicador=currentView==='anual'?12:1;
+    const linhas=Object.keys(metasMap).filter(c=>Number(metasMap[c])>0).map(c=>{
+      const teto=Number(metasMap[c])*multiplicador;
+      const gasto=Number(valoresPeriodo[c]||0);
+      const pct=teto>0?(gasto/teto*100):0;
+      return{cat:c,teto,gasto,pct};
+    }).sort((a,b)=>b.pct-a.pct);
+    const temMetas=linhas.length>0;
+    const metasEmptyEl=document.getElementById('chartMetasEmpty');
+    if(metasEmptyEl)metasEmptyEl.style.display=temMetas?'none':'block';
+    const metasTitleEl=document.getElementById('chartMetasTitle');
+    if(metasTitleEl)metasTitleEl.textContent=isDespesa?'Teto de gasto por categoria':'Meta de ganho por categoria';
+    const corBarra=p=>p>100?'#ef4444':(p>=80?'#f59e0b':'#10b981');
+    const coMetas=chartOpts();
+    const maiorPct=temMetas?Math.max(100,...linhas.map(l=>Math.ceil(l.pct/10)*10)):100;
+    chartMetas=new Chart(document.getElementById('chartMetas'),{type:'bar',data:{labels:temMetas?linhas.map(l=>l.cat):['Sem metas definidas'],datasets:[
+      {label:isDespesa?'% do teto usado':'% da meta atingida',data:temMetas?linhas.map(l=>Math.round(l.pct)):[0],backgroundColor:temMetas?linhas.map(l=>corBarra(l.pct)):['#e2e8f0'],borderRadius:6,maxBarThickness:26}
+    ]},options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',plugins:{legend:{display:false},tooltip:{...coMetas.plugins.tooltip,callbacks:{label:c=>{if(!temMetas)return'Sem categorias com teto/meta definidos';const l=linhas[c.dataIndex];return`${fmtMoney(l.gasto)} de ${fmtMoney(l.teto)} (${Math.round(l.pct)}%)`;}}}},scales:{x:{suggestedMax:maiorPct,ticks:{color:coMetas.scales.x.ticks.color,font:{size:11},callback:v=>v+'%'},grid:{color:coMetas.scales.y.grid.color},border:{display:false}},y:{ticks:{color:coMetas.scales.x.ticks.color,font:{size:11}},grid:{display:false},border:{display:false}}}}});
+  }
 }
 function isDarkMode(){return document.documentElement.classList.contains('dark');}
 function chartOpts(){
@@ -2719,14 +2826,40 @@ function formMeta(edit){const m=edit||{};openModal(`<h3>${edit?'Editar':'Nova'} 
 function editMeta(id){const m=state.metas.find(x=>x.id===id);if(m)formMeta(m);}
 
 function renderCatsForm(){
-  const cores=state.config.coresCategoria||{};
-  const catTag=(c,idx,tipo)=>{const col=getCatColor(c,idx);const cj=JSON.stringify(c);return`<span class="cat" style="display:inline-flex;align-items:center;gap:5px"><span class="cat-swatch" data-cat="${c.replace(/"/g,'&quot;')}" style="background:${col}" onclick="openCatColorPreset(event,this.dataset.cat)" title="Escolher cor"></span>${c.replace(/</g,'&lt;')} <button type="button" onclick="removerCat('${tipo}',${idx})">&times;</button></span>`;};
-  const ce=state.config.categoriasEntradas.map((c,i)=>catTag(c,i,'ent')).join('');
-  const cd=state.config.categoriasDespesas.map((c,i)=>catTag(c,i,'desp')).join('');
-  return`<div style="grid-column:1/-1"><label style="font-size:12px;color:var(--muted);font-weight:600">Categorias de Entradas <span style="font-weight:400;font-size:11px">(clique no quadradinho colorido para personalizar)</span></label><div class="cat-list">${ce}</div><div class="add-cat"><input type="text" id="newCatEnt" placeholder="Nova categoria..."><button type="button" class="btn small" onclick="adicionarCat('ent')">+ Add</button></div></div><div style="grid-column:1/-1"><label style="font-size:12px;color:var(--muted);font-weight:600">Categorias de Despesas <span style="font-weight:400;font-size:11px">(clique no quadradinho colorido para personalizar)</span></label><div class="cat-list">${cd}</div><div class="add-cat"><input type="text" id="newCatDesp" placeholder="Nova categoria..."><button type="button" class="btn small" onclick="adicionarCat('desp')">+ Add</button></div></div>`;
+  // Linha por categoria: cor + nome + teto de gasto (despesa) / meta de ganho (entrada) mensal + remover.
+  // O valor de teto/meta fica salvo em state.config.metaCategoriaDespesa / metaCategoriaEntrada
+  // (mapa nome-da-categoria -> valor mensal), no mesmo padrão de coresCategoria. É usado no
+  // gráfico "Teto de gasto / Meta de ganho por categoria" lá no Dashboard.
+  const catRow=(c,idx,tipo)=>{
+    const col=getCatColor(c,idx);
+    const metaMap=tipo==='ent'?(state.config.metaCategoriaEntrada||{}):(state.config.metaCategoriaDespesa||{});
+    const metaVal=metaMap[c]||'';
+    const cAttr=c.replace(/"/g,'&quot;');
+    const metaLabel=tipo==='ent'?'Meta de ganho/mês':'Teto de gasto/mês';
+    return`<div class="cat-row" style="display:flex;align-items:center;gap:8px;padding:6px 4px;border-bottom:1px solid var(--border)">
+      <span class="cat-swatch" data-cat="${cAttr}" style="background:${col};flex:0 0 auto" onclick="openCatColorPreset(event,this.dataset.cat)" title="Escolher cor"></span>
+      <span style="flex:1 1 auto;min-width:0;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${cAttr}">${c.replace(/</g,'&lt;')}</span>
+      <span style="display:flex;align-items:center;gap:4px;flex:0 0 auto">
+        <span style="font-size:11px;color:var(--muted);white-space:nowrap">${metaLabel}</span>
+        <input type="number" min="0" step="0.01" placeholder="0,00" value="${metaVal}" data-cat="${cAttr}" data-tipo="${tipo}" onchange="salvarMetaCategoria(this)" style="width:92px;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:6px;background:var(--bg-2);color:var(--text);font-family:inherit">
+      </span>
+      <button type="button" onclick="removerCat('${tipo}',${idx})" title="Remover categoria" style="flex:0 0 auto">&times;</button>
+    </div>`;
+  };
+  const ce=state.config.categoriasEntradas.map((c,i)=>catRow(c,i,'ent')).join('');
+  const cd=state.config.categoriasDespesas.map((c,i)=>catRow(c,i,'desp')).join('');
+  return`<div style="grid-column:1/-1"><label style="font-size:12px;color:var(--muted);font-weight:600">Categorias de Entradas <span style="font-weight:400;font-size:11px">(cor, nome e meta de ganho mensal — clique no quadradinho pra trocar a cor)</span></label><div class="cat-list-v">${ce}</div><div class="add-cat"><input type="text" id="newCatEnt" placeholder="Nova categoria..."><button type="button" class="btn small" onclick="adicionarCat('ent')">+ Add</button></div></div><div style="grid-column:1/-1"><label style="font-size:12px;color:var(--muted);font-weight:600">Categorias de Despesas <span style="font-weight:400;font-size:11px">(cor, nome e teto de gasto mensal — clique no quadradinho pra trocar a cor)</span></label><div class="cat-list-v">${cd}</div><div class="add-cat"><input type="text" id="newCatDesp" placeholder="Nova categoria..."><button type="button" class="btn small" onclick="adicionarCat('desp')">+ Add</button></div></div>`;
+}
+function salvarMetaCategoria(inp){
+  const cat=inp.dataset.cat,tipo=inp.dataset.tipo;
+  const v=Math.max(0,Number(String(inp.value).replace(',','.'))||0);
+  const chave=tipo==='ent'?'metaCategoriaEntrada':'metaCategoriaDespesa';
+  if(!state.config[chave])state.config[chave]={};
+  if(v>0)state.config[chave][cat]=v; else delete state.config[chave][cat];
+  saveState();renderCharts();flashSave();
 }
 function adicionarCat(tipo){const id=tipo==='ent'?'newCatEnt':'newCatDesp';const v=document.getElementById(id).value.trim();if(!v)return;const arr=tipo==='ent'?state.config.categoriasEntradas:state.config.categoriasDespesas;if(arr.includes(v))return showToast('Já existe','error');pushUndo('Add categoria');arr.push(v);saveState();renderConfigPage();renderAll();showToast('Categoria adicionada');flashSave();}
-function removerCat(tipo,idx){const arr=tipo==='ent'?state.config.categoriasEntradas:state.config.categoriasDespesas;if(!confirm('Remover "'+arr[idx]+'"?'))return;pushUndo('Remover categoria');arr.splice(idx,1);saveState();renderConfigPage();renderAll();showToast('Removida');flashSave();}
+function removerCat(tipo,idx){const arr=tipo==='ent'?state.config.categoriasEntradas:state.config.categoriasDespesas;const nome=arr[idx];if(!confirm('Remover "'+nome+'"?'))return;pushUndo('Remover categoria');arr.splice(idx,1);const chave=tipo==='ent'?'metaCategoriaEntrada':'metaCategoriaDespesa';if(state.config[chave])delete state.config[chave][nome];saveState();renderConfigPage();renderAll();showToast('Removida');flashSave();}
 // Configurações deixou de ser um popup e virou uma página de verdade no menu lateral (mesmo padrão
 // de Dashboard/Contas/etc). formConfig() continua existindo só como atalho de compatibilidade.
 function formConfig(){switchTabTo('config');}
@@ -3729,6 +3862,46 @@ function atualizarFormaPagLinha(i,tipoL){
   fpSel.disabled=isCredito;
   fpSel.innerHTML=formaPagOptionsForTipoHTML(tipoL,isCredito?'credito':cur);
 }
+// ============ SUGESTÃO AUTOMÁTICA DE CATEGORIA (por palavra-chave na descrição) ============
+// Heurística simples e gratuita (sem chamada de API): reconhece nomes comuns de comércio/serviço
+// na descrição do lançamento importado e já pré-seleciona a categoria mais provável — a pessoa
+// continua podendo trocar linha por linha na tela de revisão, isso é só um ponto de partida.
+const _CATEGORIA_KEYWORDS_DESPESA = {
+  'Alimentação': ['ifood','rappi','uber eats','mcdonald','burger king',' bk ','subway','restaurante','lanchonete','padaria','panificadora','mercado','supermercado','atacad','hortifruti','pizza','pizzaria','acai','açai','habib','china in box','sushi','hamburgueria','cafeteria','starbucks','padoca','feira'],
+  'Transporte': ['uber','99app','99 pop','99pop',' 99 ','taxi','táxi','posto ','combustivel','combustível','ipiranga','shell','br mania','petrobras','ale combustiveis','estacionamento','pedagio','pedágio','sem parar','veloe','conectcar','metro','metrô','onibus','ônibus','bilhete unico','gasolina','etanol','oficina mecanica','mecânica'],
+  'Moradia': ['aluguel','condominio','condomínio','imobiliaria','imobiliária','cemig','enel','cpfl','copel','light sa','sabesp','sanepar','comgas','iptu','vivo fibra','claro net','net virtua','oi fibra','tim live'],
+  'Contas': ['boleto','fatura de agua','fatura de energia','celular','telefonia','vivo ','claro ','tim ','oi movel','seguro','porto seguro','sulamerica seguros'],
+  'Ferramentas/Software': ['google workspace','google one','adobe','canva','notion','figma','github','amazon web services',' aws ','microsoft 365','office 365','openai','chatgpt','anthropic','claude.ai','midjourney','envato','elementor','wordpress','hostgator','hostinger','godaddy','mailchimp','zapier','dropbox','zoom.us','asana','trello','slack'],
+  'Lazer': ['netflix','spotify','disney plus','disney+','hbo max','amazon prime video','prime video','youtube premium','cinema','ingresso','sympla','steam','playstation','xbox live','viagem','decolar','latam','gol linhas','azul linhas','booking.com','airbnb','hotel ','pousada','balada','bar do','cervejaria'],
+  'Saúde': ['farmacia','farmácia','drogaria','droga raia','drogasil','pague menos','unimed','hapvida','amil','sulamerica saude','notredame','academia','smart fit','smartfit','personal trainer','dentista','psicologa','psicóloga','fisioterapia','laboratorio','laboratório exame'],
+  'Educação': ['udemy','alura','coursera','faculdade','universidade','mensalidade escolar','curso online','pos graduacao','pós-graduação'],
+  'Impostos': ['darf','das simples','simples nacional','inss','irpf','imposto de renda','ipva','receita federal'],
+  'Marketing': ['meta ads','facebook ads','google ads','instagram ads','impulsionar publicacao','impulsionar publicação'],
+};
+const _CATEGORIA_KEYWORDS_ENTRADA = {
+  'Mensalidade aluno': ['mensalidade'],
+  'Curso': ['hotmart','eduzz','monetizze','kiwify','venda de curso','curso online'],
+  'Consultoria': ['consultoria','honorario','honorário'],
+  'Investimento': ['rendimento','dividendo',' cdb ','tesouro direto','resgate de investimento'],
+};
+function _normalizarTextoCategoria(s){
+  return String(s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'');
+}
+function sugerirCategoriaPorDescricao(descricao,tipoLinha,categoriasDisponiveis){
+  const desc=_normalizarTextoCategoria(descricao);
+  if(!desc)return null;
+  const dict=tipoLinha==='entrada'?_CATEGORIA_KEYWORDS_ENTRADA:(tipoLinha==='despesa_credito'||tipoLinha==='despesa_debito'?_CATEGORIA_KEYWORDS_DESPESA:null);
+  if(!dict)return null;
+  for(const categoria of Object.keys(dict)){
+    if(categoriasDisponiveis&&!categoriasDisponiveis.includes(categoria))continue; // só sugere categoria que a pessoa realmente tem cadastrada
+    const palavras=dict[categoria];
+    for(const palavra of palavras){
+      if(desc.includes(_normalizarTextoCategoria(palavra)))return categoria;
+    }
+  }
+  return null;
+}
+
 function mostrarPreview(trans,tipoDoc,catPadrao,mesFatura,contaBancariaId){
   // Pré-determina tipo sugerido e default marcado
   trans.forEach(t=>{
@@ -3738,8 +3911,10 @@ function mostrarPreview(trans,tipoDoc,catPadrao,mesFatura,contaBancariaId){
   });
   const rows=trans.map((t,i)=>{
     const cats=catsParaTipo(t._tipoInicial);
-    const catSel=cats?(cats.includes(catPadrao)?catPadrao:'Outros'):'';
-    const catSelect=cats?`<select class="prev-cat" data-i="${i}" onchange="atualizarSubcatLinha(${i})">${catOptions(cats,catSel)}</select>`:`<select class="prev-cat" data-i="${i}" disabled><option value="">—</option></select>`;
+    const catSugerida=cats?sugerirCategoriaPorDescricao(t.descricao,t._tipoInicial,cats):null;
+    t._catSugerida=catSugerida; // usado no aviso "sugerido automaticamente" abaixo da tabela
+    const catSel=cats?(catSugerida||(cats.includes(catPadrao)?catPadrao:'Outros')):'';
+    const catSelect=cats?`<select class="prev-cat" data-i="${i}" onchange="atualizarSubcatLinha(${i})">${catOptions(cats,catSel)}</select>${catSugerida?`<span class="pill" style="font-size:9px;margin-left:4px" title="Categoria sugerida automaticamente pela descrição — confira e troque se precisar">✨ sugerida</span>`:''}`:`<select class="prev-cat" data-i="${i}" disabled><option value="">—</option></select>`;
     const subcatSelect=`<select class="prev-subcat" data-i="${i}">${subcatOptions(t._tipoInicial,catSel)}</select>`;
     const contaSelectPrev=`<select class="prev-conta" data-i="${i}">${contaBancariaOptions(contaBancariaId||'')}</select>`;
     const formaPagDefault=t._tipoInicial==='despesa_credito'?'credito':(t._tipoInicial==='despesa_debito'?'debito':(t._tipoInicial==='entrada'?'pix':''));
@@ -3750,7 +3925,7 @@ function mostrarPreview(trans,tipoDoc,catPadrao,mesFatura,contaBancariaId){
   const catOptsDesp=catOptions(state.config.categoriasDespesas,catPadrao||'Outros');
   const catOptsEnt=catOptions(state.config.categoriasEntradas,'Outros');
   const _contaImport=contaBancariaId?contaBancariaById(contaBancariaId):null;
-  openModal(`<h3>Revisar lançamentos (${trans.length})</h3><p class="muted">A IA tentou identificar <strong>entradas e saídas</strong> pelo sinal do valor, mas você ajusta o tipo e a categoria de cada linha abaixo. Tudo vai entrar no perfil <strong>${escape(contaAtualObj().nome)}</strong>${_contaImport?`, vinculado à conta <strong>${escape(_contaImport.nome)}</strong>`:''}.</p>
+  openModal(`<h3>Revisar lançamentos (${trans.length})</h3><p class="muted">Tentamos identificar <strong>entradas e saídas</strong> pelo sinal do valor e já sugerimos a <strong>categoria</strong> de cada linha pela descrição (marcadas com ✨) — mas você ajusta tudo antes de importar. Tudo vai entrar no perfil <strong>${escape(contaAtualObj().nome)}</strong>${_contaImport?`, vinculado à conta <strong>${escape(_contaImport.nome)}</strong>`:''}.</p>
     <div style="display:flex;gap:8px;align-items:center;margin:10px 0;flex-wrap:wrap;padding:10px 12px;background:var(--bg-2);border:1px solid var(--border);border-radius:10px">
       <button class="btn small ghost" type="button" id="btnAllOn">✓ Marcar todos</button>
       <button class="btn small ghost" type="button" id="btnAllOff">✕ Desmarcar todos</button>
@@ -4142,6 +4317,12 @@ const firebaseConfig = {
 };
 firebase.initializeApp(firebaseConfig);
 const fbAuth = firebase.auth();
+// Idioma dos e-mails do Firebase Auth (redefinição de senha, verificação de e-mail etc.) e da
+// página de ação que abre ao clicar no link — sem isso, tudo vem em inglês por padrão. Não
+// resolve sozinho o problema de cair em spam (isso depende de configurar um domínio próprio pro
+// remetente lá no Firebase Console, em Authentication > Templates), mas já deixa o texto em
+// português pra quem recebe.
+fbAuth.languageCode = 'pt-BR';
 const fbDb   = firebase.firestore();
 
 // Persistência offline: Firebase guarda writes pendentes no IndexedDB e reenvia
@@ -4175,6 +4356,11 @@ function loadFromFirestore(uid) {
 }
 async function _loadFromFirestoreImpl(uid) {
   try {
+    // Ponto crítico do isolamento entre contas: se essa é uma pessoa/uid DIFERENTE da última
+    // que logou nesse navegador, zera o cache local ANTES de olhar pro Firestore. Sem isso, o
+    // bloco abaixo (que existe pra recuperar dados criados offline) podia confundir dados
+    // deixados por OUTRA conta com "rascunho local não sincronizado" desta conta.
+    limparCacheLocalSeTrocouDeConta(uid);
     const ref = fbDb.collection('users').doc(uid).collection('data');
     const mDoc = await ref.doc('master').get();
     if (mDoc.exists) {
@@ -4426,6 +4612,11 @@ async function doForgotPassword(e) {
 }
 async function doLogout() {
   if (!confirm('Sair da sua conta?')) return;
+  // Reforço extra de privacidade (além da trava em limparCacheLocalSeTrocouDeConta): já apaga o
+  // registro de "último uid logado" nesse navegador ao sair. Assim, se a PRÓXIMA pessoa a usar
+  // esse navegador logar com uma conta diferente, o cache local antigo já não fica associado a
+  // ninguém — é limpo de qualquer forma antes de qualquer dado ser mostrado ou sincronizado.
+  localStorage.removeItem(LAST_UID_KEY);
   await fbAuth.signOut();
 }
 
@@ -4830,12 +5021,6 @@ function mostrarNovidadesSeNecessario() {
 }
 
 // ============ AUTH LISTENER ============
-// ─── VERSÃO DE TESTE: login/ativação desativados ───
-// Este build pula direto pro dashboard pra você validar a estrutura, sem
-// precisar logar. Não há usuário Firebase autenticado (currentUser fica null),
-// então nenhuma sincronização com o Firestore acontece — tudo roda 100% local
-// (localStorage), igual à versão normal quando currentUser é null.
-// Para a versão final com login de verdade, veja o arquivo entregue como final.
 document.addEventListener('DOMContentLoaded', () => {
   fbAuth.onAuthStateChanged(async (user) => {
     if (user) {
