@@ -79,6 +79,8 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   }
   .btn-primary{background:var(--blue-600);color:#fff;box-shadow:0 12px 24px -8px rgba(30,86,214,0.55);}
   .btn-primary:hover{transform:translateY(-2px);box-shadow:0 16px 30px -8px rgba(30,86,214,0.6);}
+  .btn-outline{background:#fff;color:var(--blue-700);border:2px solid var(--blue-100);}
+  .btn-outline:hover{transform:translateY(-2px);border-color:var(--blue-500);}
   .btn-sm{padding:10px 20px;font-size:14px;}
 
   .hero{
@@ -207,6 +209,21 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   .diff .benefit-card{border-color:#e6edfb;background:var(--blue-50);}
   .diff .benefit-card .check{background:var(--blue-600);color:#fff;}
 
+  .import-feature{background:var(--blue-900);color:#fff;}
+  .import-feature .section-head h2{color:#fff;}
+  .import-feature .section-head .tag{color:var(--blue-500);}
+  .import-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;}
+  .import-card{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.14);
+    border-radius:var(--radius-md);
+    padding:28px;
+  }
+  .import-icon{font-size:32px;margin-bottom:14px;}
+  .import-card h3{font-size:19px;color:#fff;margin-bottom:10px;}
+  .import-card p{font-size:15px;color:#c6d5f7;}
+  .import-note{margin-top:28px;text-align:center;font-size:15px;color:#a9c0f2;font-weight:600;}
+
   .offer{background:var(--blue-50);}
   .offer-stack{display:flex;flex-direction:column;gap:64px;margin-top:8px;}
   .offer-item{
@@ -237,10 +254,84 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   .ba-card.after .tagline{color:var(--blue-600);}
   .ba-card p{font-size:16px;color:var(--blue-900);font-weight:500;}
 
+  .testimonials{background:var(--blue-50);}
+  .testimonial-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;}
+  .testimonial-card{
+    background:#fff;border:1px solid #e6edfb;border-radius:var(--radius-md);
+    padding:20px;display:flex;flex-direction:column;gap:10px;
+    box-shadow:0 10px 24px -16px rgba(11,29,58,0.25);
+  }
+  .testimonial-card .tsrc{font-size:11px;font-weight:800;color:var(--blue-600);text-transform:uppercase;letter-spacing:.04em;}
+  .testimonial-card p{font-size:14.5px;color:var(--blue-900);line-height:1.5;}
+  .testimonial-card.image-card{padding:0;overflow:hidden;}
+  .testimonial-card.image-card img{width:100%;height:100%;object-fit:cover;display:block;}
+
   .price{background:linear-gradient(180deg,var(--blue-900),#081326);color:#fff;text-align:center;}
-  .price .wrap{max-width:720px;}
+  .price .wrap{max-width:760px;}
   .price h2{font-size:28px;color:#fff;}
-  .price .compare{margin-top:18px;font-size:16.5px;color:#c6d5f7;max-width:560px;margin-left:auto;margin-right:auto;}
+  .price .compare{margin-top:18px;font-size:16.5px;color:#c6d5f7;max-width:600px;margin-left:auto;margin-right:auto;}
+
+  .plans-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:36px auto 0;max-width:700px;align-items:stretch;}
+  .plan-card{
+    position:relative;
+    background:#fff;color:var(--blue-900);
+    border-radius:var(--radius-lg);
+    padding:32px 26px;
+    box-shadow:0 20px 40px -18px rgba(0,0,0,0.4);
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    border:2px solid transparent;
+  }
+  .plan-card.featured{
+    border-color:var(--blue-600);
+    transform:scale(1.05);
+    box-shadow:0 30px 60px -20px rgba(0,0,0,0.55);
+    background:linear-gradient(180deg,#fff 0%, var(--blue-50) 100%);
+  }
+  .plan-badge{
+    position:absolute;top:-16px;left:50%;transform:translateX(-50%);
+    background:var(--blue-600);color:#fff;font-size:12px;font-weight:800;
+    padding:7px 16px;border-radius:100px;white-space:nowrap;
+    box-shadow:0 8px 16px -6px rgba(30,86,214,0.5);
+  }
+  @media (max-width:860px){
+    .plan-card.featured{transform:none;}
+  }
+  .plan-name{font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--gray-600);margin-bottom:10px;}
+  .plan-price{font-weight:900;color:var(--blue-700);line-height:1;}
+  .plan-price .cur{font-size:20px;vertical-align:top;position:relative;top:6px;}
+  .plan-price .cents{font-size:44px;}
+  .plan-price{font-size:44px;}
+  .plan-price .per{font-size:15px;font-weight:700;color:var(--gray-500);}
+  .plan-sub{margin-top:8px;font-size:12.5px;color:var(--gray-500);font-weight:600;}
+  .plan-save{
+    margin-top:10px;font-size:12px;font-weight:700;color:var(--green);
+    background:var(--green-bg);padding:6px 10px;border-radius:8px;
+  }
+  .plan-checks{margin:18px 0 6px;text-align:left;width:100%;display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--blue-50);padding-top:16px;}
+  .plan-checks div{font-size:12.5px;color:var(--blue-900);font-weight:500;}
+  .plan-checks div span{color:var(--green);font-weight:800;margin-right:4px;}
+  .plan-card .btn{margin-top:auto;width:100%;padding-top:20px;}
+  .plan-card .btn{margin-top:14px;}
+
+  .guarantee-focus{
+    margin:40px auto 0;max-width:600px;
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.15);
+    border-radius:var(--radius-lg);
+    padding:26px 30px;
+    display:flex;align-items:center;gap:22px;
+    text-align:left;
+  }
+  .gf-number{
+    flex:none;width:72px;height:72px;border-radius:50%;
+    background:var(--green);color:#fff;
+    font-size:34px;font-weight:900;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .gf-title{font-size:18px;font-weight:800;color:#fff;}
+  .gf-stars{margin-top:2px;font-size:13px;}
+  .gf-text p{margin-top:8px;font-size:14px;color:#c6d5f7;}
+
   .price-box{
     margin:32px auto 0;max-width:420px;
     background:#fff;color:var(--blue-900);
@@ -250,16 +341,22 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   .price-box .old{font-size:16px;color:var(--gray-500);text-decoration:line-through;}
   .price-box .val{font-size:52px;font-weight:900;color:var(--blue-700);margin:8px 0 2px;}
   .price-box .once{font-size:13.5px;color:var(--gray-500);font-weight:600;}
-  .price-box .bonus{
-    margin-top:12px;font-size:13px;font-weight:700;color:var(--blue-700);
-    background:var(--blue-50);padding:9px 12px;border-radius:10px;
+  .under{margin-top:14px;font-size:12.5px;color:#c6d5f7;}
+
+  .faq{background:var(--blue-50);}
+  .faq-list{max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:12px;}
+  .faq-item{
+    background:#fff;border:1px solid #e6edfb;border-radius:var(--radius-sm);
+    padding:18px 22px;
   }
-  .price-box .guarantee{
-    margin-top:8px;font-size:13px;font-weight:700;color:var(--green);
-    background:var(--green-bg);padding:9px 12px;border-radius:10px;
+  .faq-item summary{
+    cursor:pointer;font-weight:700;font-size:15.5px;color:var(--blue-900);
+    list-style:none;display:flex;justify-content:space-between;align-items:center;gap:12px;
   }
-  .price-box .btn{margin-top:22px;width:100%;}
-  .price-box .under{margin-top:14px;font-size:12.5px;color:var(--gray-500);}
+  .faq-item summary::-webkit-details-marker{display:none;}
+  .faq-item summary::after{content:'+';font-size:20px;color:var(--blue-600);font-weight:400;flex:none;}
+  .faq-item[open] summary::after{content:'\2212';}
+  .faq-item p{margin-top:12px;font-size:14.5px;color:var(--gray-600);line-height:1.6;}
 
   .final{
     background:linear-gradient(135deg, var(--blue-500), var(--blue-700));
@@ -308,7 +405,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
     .hero .wrap, .product .wrap, .pain-split .wrap{grid-template-columns:1fr;}
     .product .wrap{gap:36px;}
     .hero h1{font-size:30px;}
-    .imagine-list, .benefit-grid, .ba-grid, .check-grid{grid-template-columns:1fr;}
+    .imagine-list, .benefit-grid, .ba-grid, .check-grid, .import-grid{grid-template-columns:1fr;}
     .product .device{order:-1;}
     .offer-item{grid-template-columns:1fr;text-align:center;}
     .offer-item .offer-media, .offer-item:nth-child(even) .offer-media{order:1;}
@@ -325,7 +422,15 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
     .hero-cta{flex-direction:column;align-items:center;}
     .imagine-list, .check-grid, .no-list, .benefit-card{text-align:left;}
 
+    .testimonial-grid{grid-template-columns:1fr 1fr;}
+    .plans-grid{grid-template-columns:1fr;max-width:340px;}
+    .guarantee-focus{flex-direction:column;text-align:center;}
+
     .social-proof{left:12px;bottom:12px;max-width:260px;padding:12px 14px;}
+  }
+
+  @media (max-width:520px){
+    .testimonial-grid{grid-template-columns:1fr;}
   }
 </style>
 </head>
@@ -338,11 +443,11 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
       <div>
         <span class="eyebrow">👋 Chega de Excel</span>
         <h1>Entenda sua vida financeira em <span class="accent">menos de 10 segundos.</span></h1>
-        <p class="sub">Sem planilhas, sem fórmulas e sem mensalidades. Um painel visual mostra saldo, gastos, receitas, metas e gráficos automaticamente, no computador ou no celular.</p>
-        <p class="price-line">Uma única vez. R$29,90.</p>
+        <p class="sub">Sem planilhas, sem fórmulas. Um painel visual mostra saldo, gastos, receitas, metas e gráficos automaticamente, no computador ou no celular.</p>
+        <p class="price-line">Por menos de R$8 por mês.</p>
         <div class="hero-cta">
           <a href="#comprar" class="btn btn-primary">→ Quero meu Dashboard Financeiro</a>
-          <span class="microcopy">Acesso vitalício, funciona no computador e no celular</span>
+          <span class="microcopy">Cancele quando quiser · funciona no computador e no celular</span>
         </div>
       </div>
       <div>
@@ -430,7 +535,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
         </div>
         <div class="benefit-card">
           <span class="check">👤</span>
-          <div><h3>Múltiplos perfis financeiros</h3><p>Vida pessoal e negócio em perfis separados, na mesma conta. Ideal pra autônomos, MEIs e pequenos empreendedores.</p></div>
+          <div><h3>Múltiplos perfis financeiros</h3><p>Vida pessoal e negócio em perfis separados, na mesma conta. Ideal pra autônomas, MEIs e pequenos empreendedores.</p></div>
         </div>
         <div class="benefit-card">
           <span class="check">📊</span>
@@ -449,6 +554,28 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
           <div><h3>Vai com você</h3><p>A maioria dos gastos acontece fora de casa. Registre na hora, pelo celular, antes do "depois eu anoto" virar esquecimento.</p></div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <section class="import-feature">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="tag">Importação em massa</span>
+        <h2>Chega de lançar gasto por gasto.</h2>
+      </div>
+      <div class="import-grid">
+        <div class="import-card">
+          <div class="import-icon">🏦</div>
+          <h3>Importe seu extrato bancário</h3>
+          <p>Sobe o extrato do banco e o Dashboard organiza tudo automaticamente por categoria. Você só revisa e confirma, sem digitar linha por linha.</p>
+        </div>
+        <div class="import-card">
+          <div class="import-icon">💳</div>
+          <h3>Importe sua fatura do cartão</h3>
+          <p>A fatura fechou? É só importar. Cada compra é categorizada automaticamente, parcelas incluídas, sem lançar item por item no crédito.</p>
+        </div>
+      </div>
+      <p class="import-note">Importe automaticamente e só revise. Em menos de 1 minuto, seu mês inteiro está organizado.</p>
     </div>
   </section>
 
@@ -485,7 +612,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   <section class="offer">
     <div class="wrap">
       <div class="section-head">
-        <span class="tag">Tudo o que você recebe ao comprar</span>
+        <span class="tag">Tudo o que você recebe na sua assinatura</span>
         <h2>Não é só um painel. É o pacote completo.</h2>
       </div>
       <div class="offer-stack">
@@ -499,7 +626,7 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
           <div class="offer-media">
             <img src="offer-perfis.png" alt="Múltiplos perfis e categorias personalizáveis" style="width:100%;height:auto;display:block;">
           </div>
-          <div class="offer-text"><h3>Múltiplos perfis financeiros</h3><p>Organize vida pessoal e negócio sem misturar as contas, ideal pra autônomos, MEIs e pequenos empreendedores.</p></div>
+          <div class="offer-text"><h3>Múltiplos perfis financeiros</h3><p>Organize vida pessoal e negócio sem misturar as contas, ideal pra autônomas, MEIs e pequenos empreendedores.</p></div>
         </div>
         <div class="offer-item">
           <div class="offer-media">
@@ -523,24 +650,124 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
     </div>
   </section>
 
+  <section class="testimonials">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="tag">Depoimentos</span>
+        <h2>O que quem já usa o Dashboard Financeiro está dizendo</h2>
+      </div>
+      <div class="testimonial-grid">
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-1.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-2.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-3.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-4.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-5.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+        <div class="testimonial-card image-card">
+          <img src="../depoimentos/depoimento-6.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+        </div>
+      </div>
+    </div>
+  </section>
+
   <section class="price" id="comprar">
     <div class="wrap">
-      <h2>Quanto custa mais um mês sem saber pra onde foi seu dinheiro?</h2>
-      <p class="compare">Uma consultoria financeira custa entre R$200 e R$500 por hora. Um app de finanças cobra mensalidade pra sempre. O Dashboard Financeiro é um único investimento, e você continua usando quando quiser.</p>
-      <div class="price-box">
-        <div class="check-grid" style="margin-bottom:20px;grid-template-columns:1fr;text-align:left;">
-          <div><span class="tick">✓</span> Acesso vitalício ao Dashboard Financeiro</div>
-          <div><span class="tick">✓</span> Importação de extratos e faturas</div>
-          <div><span class="tick">✓</span> Múltiplos perfis (pessoal e negócio)</div>
-          <div><span class="tick">✓</span> Gráficos, metas e relatórios em PDF</div>
-          <div><span class="tick">✓</span> Acesso vitalício, funciona no computador e no celular</div>
+      <h2>Escolha como quer continuar no controle das suas finanças</h2>
+      <p class="compare">Por menos de R$8 por mês, seu Dashboard nunca para de evoluir: toda atualização e função nova chega sem custo extra, com suporte sempre ativo. Não gostou? Cancele quando quiser, sem multa e sem burocracia.</p>
+
+      <div class="plans-grid">
+        <div class="plan-card">
+          <div class="plan-name">Mensal</div>
+          <div class="plan-price"><span class="cur">R$</span>29<span class="cents">,90</span><span class="per">/mês</span></div>
+          <div class="plan-sub">cobrado todo mês · cancele quando quiser</div>
+          <div class="plan-checks">
+            <div><span>✓</span>Dashboard completo, sempre atualizado</div>
+            <div><span>✓</span>Importação de extratos e faturas</div>
+            <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
+            <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
+            <div><span>✓</span>Funciona no computador e no celular</div>
+          </div>
+          <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn btn-outline">Quero o plano mensal</a>
         </div>
-        <div class="old">De R$49,90</div>
-        <div class="val">R$29,90</div>
-        <div class="once">pagamento único, sem mensalidade</div>
-        <div class="guarantee">🛡️ Garantia incondicional de 7 dias</div>
-        <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn btn-primary">→ Uma única vez. R$29,90.</a>
-        <div class="under">🔒 Não conectamos ao seu banco. Você importa os extratos manualmente, e seus dados ficam seguros e sob seu controle</div>
+
+        <div class="plan-card featured">
+          <div class="plan-badge">🔥 +70% de desconto</div>
+          <div class="plan-name">Anual</div>
+          <div class="plan-price"><span class="cur">R$</span>7<span class="cents">,90</span><span class="per">/mês</span></div>
+          <div class="plan-sub">cobrado uma vez por ano · R$94,80 à vista</div>
+          <div class="plan-save">economize R$264,00 por ano vs. o mensal</div>
+          <div class="plan-checks">
+            <div><span>✓</span>Dashboard completo, sempre atualizado</div>
+            <div><span>✓</span>Importação de extratos e faturas</div>
+            <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
+            <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
+            <div><span>✓</span>Funciona no computador e no celular</div>
+          </div>
+          <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn btn-primary">Quero o plano anual</a>
+        </div>
+      </div>
+
+      <div class="guarantee-focus">
+        <div class="gf-number">7</div>
+        <div class="gf-text">
+          <div class="gf-title">7 dias de garantia total</div>
+          <div class="gf-stars">⭐⭐⭐⭐⭐</div>
+          <p>Use o Dashboard por 7 dias. Se por qualquer motivo não for pra você, é só pedir e devolvemos 100% do valor, sem burocracia.</p>
+        </div>
+      </div>
+
+      <div class="under" style="margin-top:20px;">🔒 Não conectamos ao seu banco. Você importa os extratos manualmente, e seus dados ficam seguros e sob seu controle</div>
+    </div>
+  </section>
+
+  <section class="faq">
+    <div class="wrap">
+      <div class="section-head">
+        <span class="tag">Dúvidas frequentes</span>
+        <h2>Perguntas frequentes</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>O Dashboard funciona para qualquer pessoa?</summary>
+          <p>Sim. Funciona pra quem já tenta se organizar e quer parar de sofrer com planilha, e também pra quem nunca conseguiu manter nenhum controle financeiro. A interface é visual e não exige nenhum conhecimento técnico.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Não tenho nenhum conhecimento prévio, consigo usar mesmo assim?</summary>
+          <p>Sim, o Dashboard foi feito pra ser simples desde o primeiro acesso. E se quiser aprender ainda mais rápido, tem o adicional de aulas completas em vídeo disponível no checkout.</p>
+        </details>
+        <details class="faq-item">
+          <summary>O Dashboard se conecta com a minha conta do banco?</summary>
+          <p>Não. Por segurança, nunca pedimos login, senha ou acesso à sua conta bancária. Você mesma importa o extrato ou a fatura, em poucos cliques, e mantém total controle sobre seus dados.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Qual a diferença entre o plano mensal e o anual?</summary>
+          <p>Os dois dão acesso ao mesmo Dashboard completo. No mensal você paga R$29,90 por mês e pode cancelar quando quiser. No anual, você paga uma vez por ano o equivalente a R$7,90/mês, com mais de 70% de desconto em relação ao mensal.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Posso cancelar quando quiser?</summary>
+          <p>Sim. Não existe fidelidade nem multa. Você pode cancelar sua assinatura a qualquer momento diretamente na plataforma de pagamento.</p>
+        </details>
+        <details class="faq-item">
+          <summary>Como recebo meu acesso?</summary>
+          <p>Assim que o pagamento é aprovado, você recebe o acesso por e-mail em poucos minutos, com o passo a passo pra começar a usar.</p>
+        </details>
+        <details class="faq-item">
+          <summary>O pagamento é seguro?</summary>
+          <p>Sim, o pagamento é processado por uma plataforma segura e criptografada. Seus dados de pagamento nunca passam por nós.</p>
+        </details>
+        <details class="faq-item">
+          <summary>E se eu não gostar?</summary>
+          <p>Você tem 7 dias de garantia incondicional. Se não for pra você, é só pedir o reembolso, sem burocracia.</p>
+        </details>
       </div>
     </div>
   </section>
@@ -548,8 +775,8 @@ src="https://www.facebook.com/tr?id=1744068180356884&ev=PageView&noscript=1"
   <section class="final">
     <div class="wrap">
       <h2>Comece hoje mesmo a enxergar sua vida financeira com clareza.</h2>
-      <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn">👉 Quero meu Dashboard Financeiro por R$29,90</a>
-      <p class="microcopy">Pagamento único · acesso vitalício · garantia de 7 dias</p>
+      <a href="#comprar" class="btn">👉 Quero organizar minhas finanças</a>
+      <p class="microcopy">Por menos de R$8 por mês · cancele quando quiser · garantia de 7 dias</p>
     </div>
   </section>
 
