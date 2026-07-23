@@ -90,8 +90,16 @@
     font-size: clamp(16px, 2vw, 20px);
     color: #9ca3af;
     max-width: 540px;
-    margin: 0 auto 40px;
+    margin: 0 auto 8px;
     line-height: 1.6;
+  }
+
+  .hero-price-line {
+    font-family: 'Sora', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--verde);
+    margin-bottom: 32px;
   }
 
   .hero-cta-wrap {
@@ -118,6 +126,24 @@
   }
   .btn-primary:hover { background: var(--verde-escuro); transform: translateY(-1px); }
   .btn-primary:active { transform: translateY(0); }
+
+  .btn-outline-v {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: transparent;
+    color: var(--verde);
+    border: 2px solid rgba(29,184,126,0.4);
+    font-family: 'Sora', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px 26px;
+    border-radius: 12px;
+    text-decoration: none;
+    transition: transform .15s ease, border-color .15s ease;
+  }
+  .btn-outline-v:hover { border-color: var(--verde); transform: translateY(-1px); }
 
   .hero-trust {
     font-size: 13px;
@@ -528,11 +554,67 @@
   .feature-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
   .feature-desc { font-size: 14px; color: var(--cinza-500); line-height: 1.6; }
 
+  .importacao-section {
+    background: var(--cinza-900);
+    color: var(--branco);
+    padding: 80px 24px;
+  }
+  .importacao-section .section-label { color: var(--verde); }
+  .importacao-section h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    margin-bottom: 16px;
+    letter-spacing: -0.02em;
+  }
+  .importacao-grid {
+    max-width: 900px; margin: 0 auto;
+    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+  }
+  .importacao-card {
+    background: var(--cinza-800);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .importacao-icon { font-size: 32px; margin-bottom: 14px; }
+  .importacao-card h3 { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 10px; color: var(--branco); }
+  .importacao-card p { font-size: 15px; color: #9ca3af; line-height: 1.6; }
+  .importacao-note { max-width: 700px; margin: 28px auto 0; text-align: center; font-size: 15px; color: #9ca3af; font-weight: 600; }
+  @media (max-width: 600px) { .importacao-grid { grid-template-columns: 1fr; } }
+
+  .depoimentos-section { background: var(--cinza-100); padding: 80px 24px; }
+  .depoimentos-section .section-label { color: var(--verde-escuro); }
+  .depoimentos-section h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    margin-bottom: 40px;
+    letter-spacing: -0.02em;
+  }
+  .depoimento-grid {
+    max-width: 980px; margin: 0 auto;
+    display: grid; grid-template-columns: repeat(3,1fr); gap: 18px;
+  }
+  .depoimento-card {
+    background: var(--branco);
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 20px;
+    display: flex; flex-direction: column; gap: 10px;
+    box-shadow: 0 10px 24px -16px rgba(0,0,0,0.15);
+  }
+  .depoimento-fonte { font-size: 11px; font-weight: 800; color: var(--verde-escuro); text-transform: uppercase; letter-spacing: 0.06em; }
+  .depoimento-card p { font-size: 14.5px; color: var(--cinza-900); line-height: 1.5; }
+  .depoimento-card.depoimento-image { padding: 0; }
+  .depoimento-card.depoimento-image img { width: 100%; height: auto; display: block; }
+  @media (max-width: 700px) { .depoimento-grid { grid-template-columns: 1fr; } }
+
   .preco-section {
     background: var(--cinza-100);
     padding: 80px 24px;
   }
-  .preco-inner { max-width: 680px; margin: 0 auto; }
+  .preco-inner { max-width: 720px; margin: 0 auto; }
   .preco-section h2 {
     font-family: 'Sora', sans-serif;
     font-size: clamp(24px, 3.5vw, 36px);
@@ -540,6 +622,10 @@
     text-align: center;
     margin-bottom: 12px;
     letter-spacing: -0.02em;
+  }
+  .preco-compare-text {
+    max-width: 600px; margin: 16px auto 0;
+    text-align: center; font-size: 16px; color: #4b5563; line-height: 1.6;
   }
   .preco-comparacao {
     display: grid;
@@ -562,41 +648,87 @@
   .comp-card.ruim .comp-label { color: #dc2626; }
   .comp-card.neutro .comp-label { color: #d97706; }
   .comp-card.bom .comp-label { color: var(--verde-escuro); }
-  .comp-price { font-family: 'Sora', sans-serif; font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .comp-price { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
   .comp-desc { font-size: 13px; color: var(--cinza-500); line-height: 1.4; }
 
-  .preco-card {
+  .plans-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    max-width: 700px;
+    margin: 36px auto 0;
+    align-items: stretch;
+  }
+  .plan-card {
+    position: relative;
     background: var(--cinza-900);
     color: var(--branco);
     border-radius: 20px;
-    padding: 40px;
-    text-align: center;
-    border: 2px solid rgba(29,184,126,0.3);
+    padding: 32px 26px;
+    border: 2px solid rgba(29,184,126,0.15);
+    display: flex; flex-direction: column; align-items: center; text-align: center;
   }
-  .preco-de { font-size: 16px; color: #6b7280; text-decoration: line-through; margin-bottom: 4px; }
-  .preco-por { font-family: 'Sora', sans-serif; font-size: 56px; font-weight: 900; color: var(--verde); line-height: 1; margin-bottom: 8px; }
-  .preco-por sup { font-size: 24px; }
-  .preco-condicao { color: #9ca3af; font-size: 15px; margin-bottom: 32px; }
-  .preco-lista { text-align: left; margin-bottom: 32px; display: inline-block; }
-  .preco-item { display: flex; align-items: center; gap: 10px; font-size: 15px; margin-bottom: 10px; }
-  .preco-item-check { color: var(--verde); font-weight: 700; font-size: 16px; }
+  .plan-card.featured {
+    border-color: var(--verde);
+    transform: scale(1.05);
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
+    background: linear-gradient(180deg, var(--cinza-900) 0%, #0a2a1e 100%);
+  }
+  .plan-badge {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    background: var(--verde); color: #fff; font-size: 12px; font-weight: 800;
+    padding: 7px 16px; border-radius: 100px; white-space: nowrap;
+    box-shadow: 0 8px 16px -6px rgba(29,184,126,0.5);
+  }
+  @media (max-width: 600px) {
+    .plan-card.featured { transform: none; }
+  }
+  .plan-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af; margin-bottom: 10px; }
+  .plan-price { font-family: 'Sora', sans-serif; font-weight: 900; color: var(--verde); line-height: 1; font-size: 42px; }
+  .plan-price .cur { font-size: 18px; vertical-align: top; position: relative; top: 4px; }
+  .plan-price .per { font-size: 14px; font-weight: 700; color: #9ca3af; }
+  .plan-sub { margin-top: 8px; font-size: 12px; color: #9ca3af; font-weight: 600; }
+  .plan-save { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--verde); background: rgba(29,184,126,0.12); padding: 6px 10px; border-radius: 8px; }
+  .plan-checks { margin: 18px 0 6px; text-align: left; width: 100%; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
+  .plan-checks div { font-size: 12.5px; color: #e5e7eb; font-weight: 500; }
+  .plan-checks div span { color: var(--verde); font-weight: 800; margin-right: 4px; }
+  .plan-card .btn-primary, .plan-card .btn-outline-v { margin-top: 14px; width: 100%; justify-content: center; }
 
-  .garantia-box {
-    background: rgba(29,184,126,0.12);
-    border: 1px solid rgba(29,184,126,0.3);
-    border-radius: 14px;
-    padding: 24px 28px;
-    margin: 0 auto 24px;
-    max-width: 580px;
-    display: flex;
-    gap: 16px;
-    align-items: flex-start;
-    text-align: left;
+  .guarantee-focus {
+    margin: 32px auto 0; max-width: 600px;
+    background: var(--cinza-900); color: var(--branco);
+    border: 1px solid rgba(29,184,126,0.25);
+    border-radius: 20px; padding: 26px 30px;
+    display: flex; align-items: center; gap: 22px; text-align: left;
   }
-  .garantia-icon { font-size: 32px; flex-shrink: 0; }
-  .garantia-titulo { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 17px; color: var(--branco); margin-bottom: 6px; }
-  .garantia-texto { font-size: 14px; color: #9ca3af; line-height: 1.6; }
-  .garantia-texto strong { color: var(--branco); }
+  .gf-number {
+    flex: none; width: 70px; height: 70px; border-radius: 50%;
+    background: var(--verde); color: #fff;
+    font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 900;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .gf-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: var(--branco); }
+  .gf-stars { margin-top: 2px; font-size: 13px; }
+  .gf-text p { margin-top: 8px; font-size: 14px; color: #9ca3af; }
+
+  .faq-section { background: var(--branco); padding: 80px 24px; }
+  .faq-section h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(26px, 4vw, 40px);
+    font-weight: 800;
+    margin-bottom: 40px;
+    letter-spacing: -0.02em;
+  }
+  .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+  .faq-item { background: var(--cinza-100); border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 22px; }
+  .faq-item summary {
+    cursor: pointer; font-weight: 700; font-size: 15.5px; color: var(--cinza-900);
+    list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
+  }
+  .faq-item summary::-webkit-details-marker { display: none; }
+  .faq-item summary::after { content: '+'; font-size: 20px; color: var(--verde-escuro); font-weight: 400; flex: none; }
+  .faq-item[open] summary::after { content: '\2212'; }
+  .faq-item p { margin-top: 12px; font-size: 14.5px; color: #4b5563; line-height: 1.6; }
 
   .cta-final {
     background: var(--verde);
@@ -687,6 +819,8 @@
   @media (max-width:600px){
     .topbar{font-size:12px;padding:10px 12px;}
     .social-proof{left:12px;bottom:12px;max-width:260px;padding:12px 14px;}
+    .guarantee-focus{flex-direction:column;text-align:center;}
+    .plans-grid{grid-template-columns:1fr;max-width:320px;}
   }
 </style>
 </head>
@@ -699,12 +833,13 @@
 <section class="hero">
   <div class="hero-eyebrow">✦ Dashboard Financeiro</div>
   <h1>Chega de Excel.<br>Entenda suas finanças<br>em <em>menos de 10 segundos.</em></h1>
-  <p class="hero-sub">Sem planilhas, sem fórmulas, sem mensalidade. Um painel visual que responde tudo antes de você terminar de pensar a pergunta.</p>
+  <p class="hero-sub">Sem planilhas, sem fórmulas. Um painel visual que responde tudo antes de você terminar de pensar a pergunta.</p>
+  <p class="hero-price-line">Por menos de R$8 por mês.</p>
   <div class="hero-cta-wrap">
     <a href="#preco" class="btn-primary">→ Quero meu Dashboard agora</a>
     <div class="hero-trust">
       <span>🔒 Pagamento seguro</span>
-      <span>✅ Acesso vitalício</span>
+      <span>✅ Cancele quando quiser</span>
       <span>🛡️ 7 dias de garantia</span>
     </div>
   </div>
@@ -890,7 +1025,7 @@
 <section class="features">
   <div class="section-label text-center">Por que é diferente</div>
   <h2>Cada função existe pra eliminar um atrito</h2>
-  <p class="features-sub">Enquanto apps cobram mensalidade e planilhas quebram, o Dashboard faz o trabalho por você.</p>
+  <p class="features-sub">Enquanto apps cobram mensalidade cara e planilhas quebram, o Dashboard faz o trabalho por você.</p>
   <div class="features-grid">
     <div class="feature-card">
       <div class="feature-icon">📥</div>
@@ -925,16 +1060,60 @@
   </div>
 </section>
 
+<section class="importacao-section">
+  <div class="section-label text-center">Importação em massa</div>
+  <h2 class="text-center">Chega de lançar gasto por gasto.</h2>
+  <div class="importacao-grid" style="margin-top:32px;">
+    <div class="importacao-card">
+      <div class="importacao-icon">🏦</div>
+      <h3>Importe seu extrato bancário</h3>
+      <p>Sobe o extrato do banco e o Dashboard organiza tudo automaticamente por categoria. Você só revisa e confirma, sem digitar linha por linha.</p>
+    </div>
+    <div class="importacao-card">
+      <div class="importacao-icon">💳</div>
+      <h3>Importe sua fatura do cartão</h3>
+      <p>A fatura fechou? É só importar. Cada compra é categorizada automaticamente, parcelas incluídas, sem lançar item por item no crédito.</p>
+    </div>
+  </div>
+  <p class="importacao-note">Importe automaticamente e só revise. Em menos de 1 minuto, seu mês inteiro está organizado.</p>
+</section>
+
+<section class="depoimentos-section">
+  <div class="section-label text-center">Depoimentos</div>
+  <h2 class="text-center">O que quem já usa o Dashboard Financeiro está dizendo</h2>
+  <div class="depoimento-grid">
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-1.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-2.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-3.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-4.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-5.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+    <div class="depoimento-card depoimento-image">
+      <img src="../depoimentos/depoimento-6.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
+    </div>
+  </div>
+</section>
+
 <section class="preco-section" id="preco">
   <div class="preco-inner">
-    <div class="section-label text-center">Investimento único</div>
-    <h2>Quanto custa mais um mês sem saber pra onde foi o dinheiro?</h2>
+    <div class="section-label text-center">Escolha seu plano</div>
+    <h2>Escolha como quer continuar no controle das suas finanças</h2>
+    <p class="preco-compare-text">Por menos de R$8 por mês, seu Dashboard nunca para de evoluir: toda atualização e função nova chega sem custo extra, com suporte sempre ativo. Não gostou? Cancele quando quiser, sem multa e sem burocracia.</p>
 
     <div class="preco-comparacao">
       <div class="comp-card ruim">
         <div class="comp-label">Apps concorrentes</div>
-        <div class="comp-price">R$30/mês</div>
-        <div class="comp-desc">Todo mês, para sempre. Em 2 meses você já gastou mais.</div>
+        <div class="comp-price">R$50/mês</div>
+        <div class="comp-desc">Todo mês, para sempre, sem desconto nenhum.</div>
       </div>
       <div class="comp-card neutro">
         <div class="comp-label">Planilha "grátis"</div>
@@ -943,43 +1122,101 @@
       </div>
       <div class="comp-card bom">
         <div class="comp-label">Dashboard Financeiro</div>
-        <div class="comp-price">R$29,90</div>
-        <div class="comp-desc">Uma única vez. Para sempre. Começa em menos de 2 minutos.</div>
+        <div class="comp-price">Menos de R$8/mês</div>
+        <div class="comp-desc">Menos que um café por semana. Atualizações e suporte pra sempre.</div>
       </div>
     </div>
 
-    <div class="preco-card">
-      <div class="preco-de">De R$49,90</div>
-      <div class="preco-por"><sup>R$</sup>29,90</div>
-      <div class="preco-condicao">pagamento único · sem mensalidade · acesso vitalício</div>
-      <div class="preco-lista">
-        <div class="preco-item"><span class="preco-item-check">✓</span> Acesso vitalício ao Dashboard Financeiro</div>
-        <div class="preco-item"><span class="preco-item-check">✓</span> Importação de extratos e faturas</div>
-        <div class="preco-item"><span class="preco-item-check">✓</span> Múltiplos perfis (pessoal e negócio)</div>
-        <div class="preco-item"><span class="preco-item-check">✓</span> Gráficos, metas e relatórios em PDF</div>
-        <div class="preco-item"><span class="preco-item-check">✓</span> Funciona no computador e no celular</div>
-      </div>
-
-      <div class="garantia-box">
-        <div class="garantia-icon">🛡️</div>
-        <div>
-          <div class="garantia-titulo">Garantia incondicional de 7 dias</div>
-          <div class="garantia-texto">Você tem 7 dias pra usar, testar e decidir. Se em uma semana o Dashboard não mudar a forma como você enxerga seu dinheiro, manda um e-mail e devolvemos <strong>100% do valor</strong> — sem pergunta, sem burocracia, sem enrolação.</div>
+    <div class="plans-grid">
+      <div class="plan-card">
+        <div class="plan-name">Mensal</div>
+        <div class="plan-price"><span class="cur">R$</span>29<span class="cents">,90</span><span class="per">/mês</span></div>
+        <div class="plan-sub">cobrado todo mês · cancele quando quiser</div>
+        <div class="plan-checks">
+          <div><span>✓</span>Dashboard completo, sempre atualizado</div>
+          <div><span>✓</span>Importação de extratos e faturas</div>
+          <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
+          <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
+          <div><span>✓</span>Funciona no computador e no celular</div>
         </div>
+        <a href="https://pay.kiwify.com.br/JTbi7bF" target="_blank" rel="noopener" class="btn-outline-v">Quero o plano mensal</a>
       </div>
 
-      <a href="https://pay.kiwify.com.br/GG7XxXv" target="_blank" rel="noopener" class="btn-primary" style="font-size:18px;padding:20px 40px;margin-bottom:12px">→ Quero meu Dashboard agora — R$29,90</a>
-      <div style="color:#6b7280;font-size:13px;margin-top:4px">🔒 Pagamento seguro e criptografado · Acesso imediato após a compra</div>
+      <div class="plan-card featured">
+        <div class="plan-badge">🔥 +70% de desconto</div>
+        <div class="plan-name">Anual</div>
+        <div class="plan-price"><span class="cur">R$</span>7<span class="cents">,90</span><span class="per">/mês</span></div>
+        <div class="plan-sub">cobrado uma vez por ano · R$94,80 à vista</div>
+        <div class="plan-save">economize R$264,00 por ano vs. o mensal</div>
+        <div class="plan-checks">
+          <div><span>✓</span>Dashboard completo, sempre atualizado</div>
+          <div><span>✓</span>Importação de extratos e faturas</div>
+          <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
+          <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
+          <div><span>✓</span>Funciona no computador e no celular</div>
+        </div>
+        <a href="https://pay.kiwify.com.br/xdxSBKU" target="_blank" rel="noopener" class="btn-primary">Quero o plano anual</a>
+      </div>
     </div>
+
+    <div class="guarantee-focus">
+      <div class="gf-number">7</div>
+      <div class="gf-text">
+        <div class="gf-title">7 dias de garantia total</div>
+        <div class="gf-stars">⭐⭐⭐⭐⭐</div>
+        <p>Use o Dashboard por 7 dias. Se por qualquer motivo não for pra você, é só pedir e devolvemos 100% do valor, sem burocracia.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;color:#4b5563;font-size:13px;text-align:center;">🔒 Não conectamos ao seu banco. Você importa os extratos manualmente, e seus dados ficam seguros e sob seu controle</div>
+  </div>
+</section>
+
+<section class="faq-section">
+  <div class="section-label text-center">Dúvidas frequentes</div>
+  <h2 class="text-center">Perguntas frequentes</h2>
+  <div class="faq-list">
+    <details class="faq-item">
+      <summary>O Dashboard funciona para qualquer pessoa?</summary>
+      <p>Sim. Funciona pra quem já tenta se organizar e quer parar de sofrer com planilha, e também pra quem nunca conseguiu manter nenhum controle financeiro. A interface é visual e não exige nenhum conhecimento técnico.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Não tenho nenhum conhecimento prévio, consigo usar mesmo assim?</summary>
+      <p>Sim, o Dashboard foi feito pra ser simples desde o primeiro acesso.</p>
+    </details>
+    <details class="faq-item">
+      <summary>O Dashboard se conecta com a minha conta do banco?</summary>
+      <p>Não. Por segurança, nunca pedimos login, senha ou acesso à sua conta bancária. Você mesma importa o extrato ou a fatura, em poucos cliques, e mantém total controle sobre seus dados.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Qual a diferença entre o plano mensal e o anual?</summary>
+      <p>Os dois dão acesso ao mesmo Dashboard completo. No mensal você paga R$29,90 por mês e pode cancelar quando quiser. No anual, você paga uma vez por ano o equivalente a R$7,90/mês, com mais de 70% de desconto em relação ao mensal.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Posso cancelar quando quiser?</summary>
+      <p>Sim. Não existe fidelidade nem multa. Você pode cancelar sua assinatura a qualquer momento diretamente na plataforma de pagamento.</p>
+    </details>
+    <details class="faq-item">
+      <summary>Como recebo meu acesso?</summary>
+      <p>Assim que o pagamento é aprovado, você recebe o acesso por e-mail em poucos minutos, com o passo a passo pra começar a usar.</p>
+    </details>
+    <details class="faq-item">
+      <summary>O pagamento é seguro?</summary>
+      <p>Sim, o pagamento é processado por uma plataforma segura e criptografada. Seus dados de pagamento nunca passam por nós.</p>
+    </details>
+    <details class="faq-item">
+      <summary>E se eu não gostar?</summary>
+      <p>Você tem 7 dias de garantia incondicional. Se não for pra você, é só pedir o reembolso, sem burocracia.</p>
+    </details>
   </div>
 </section>
 
 <section class="cta-final">
   <h2>Comece a enxergar seu dinheiro com clareza — antes de mais um mês passar.</h2>
-  <p>R$29,90 único. Sem mensalidade. Acesso em menos de 2 minutos.</p>
-  <a href="#preco" class="btn-final">→ Quero meu Dashboard por R$29,90</a>
+  <p>Por menos de R$8 por mês. Cancele quando quiser.</p>
+  <a href="#preco" class="btn-final">→ Quero organizar minhas finanças</a>
   <div class="cta-final-trust">
-    <span>✅ Acesso vitalício</span>
+    <span>✅ Cancele quando quiser</span>
     <span>🛡️ 7 dias de garantia</span>
     <span>🔒 Dados seguros e criptografados</span>
     <span>📱 Funciona no celular e no computador</span>
