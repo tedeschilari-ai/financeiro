@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Financeiro — Entenda suas finanças em 10 segundos</title>
+<meta name="facebook-domain-verification" content="nqpyt2wq9vay-zaxpt98kt2epjto2ts" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@700;800;900&display=swap" rel="stylesheet">
+<!-- Meta Pixel Code -->
+<script>
+!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '874750447646279');
+fbq('track', 'PageView');
+</script>
+<noscript><img height="1" width="1" style="display:none"
+src="https://www.facebook.com/tr?id=874750447646279&ev=PageView&noscript=1"
+/></noscript>
+<!-- End Meta Pixel Code -->
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --verde: #1DB87E;
+  --verde-esc: #17a06d;
+  --verde-bg: #e8f9f2;
+  --preto: #0c0f0a;
+  --cinza-900: #111827;
+  --cinza-700: #374151;
+  --cinza-400: #9ca3af;
+  --cinza-100: #f3f4f6;
+  --branco: #ffffff;
+  --vermelho: #ef4444;
+  --amarelo: #f59e0b;
+}
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', sans-serif; color: var(--cinza-700); background: var(--branco); -webkit-font-smoothing: antialiased; line-height: 1.6; }
+
+/* ── TOPBAR ── */
+.topbar { background: var(--verde); color: var(--branco); text-align: center; padding: 10px 16px; font-size: 13px; font-weight: 700; letter-spacing: 0.02em; }
+
+/* ── LOGO ── */
+.logo-bar { text-align: center; padding: 24px 16px 0; }
+.logo-bar span { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 900; color: var(--preto); letter-spacing: -0.03em; }
+.logo-bar span em { font-style: normal; color: var(--verde); }
+
+/* ── SEÇÃO GENÉRICA ── */
+section { padding: 64px 24px; }
+.inner { max-width: 720px; margin: 0 auto; }
+.inner-sm { max-width: 560px; margin: 0 auto; }
+.inner-lg { max-width: 900px; margin: 0 auto; }
+
+/* ── TIPOGRAFIA ── */
+.eyebrow { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; color: var(--verde); margin-bottom: 12px; }
+h1 { font-family: 'Sora', sans-serif; font-size: clamp(30px, 5vw, 52px); font-weight: 900; line-height: 1.1; letter-spacing: -0.025em; color: var(--preto); }
+h2 { font-family: 'Sora', sans-serif; font-size: clamp(24px, 4vw, 40px); font-weight: 800; line-height: 1.15; letter-spacing: -0.02em; color: var(--preto); }
+h3 { font-family: 'Sora', sans-serif; font-size: clamp(18px, 2.5vw, 24px); font-weight: 700; color: var(--preto); }
+p { font-size: 17px; line-height: 1.7; color: var(--cinza-700); }
+.destaque { color: var(--verde); }
+
+/* ── BTN ── */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--verde); color: var(--branco); font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; padding: 20px 40px; border-radius: 14px; text-decoration: none; box-shadow: 0 6px 30px rgba(29,184,126,0.4); transition: background 0.2s, transform 0.15s; width: 100%; max-width: 480px; text-align: center; }
+.btn:hover { background: var(--verde-esc); transform: translateY(-2px); }
+.btn-wrap { display: flex; justify-content: center; margin-top: 32px; }
+.btn-sub { text-align: center; font-size: 13px; color: var(--cinza-400); margin-top: 10px; }
+
+/* ── HERO ── */
+.hero { background: var(--preto); color: var(--branco); padding: 64px 24px 72px; text-align: center; }
+.hero h1 { color: var(--branco); margin-bottom: 20px; }
+.hero h1 em { font-style: normal; color: var(--verde); }
+.hero-sub { font-size: clamp(16px, 2vw, 19px); color: #9ca3af; max-width: 560px; margin: 0 auto 16px; }
+.hero-preco { font-size: 15px; color: #6b7280; margin-bottom: 36px; }
+.hero-trust { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; font-size: 13px; color: #6b7280; margin-top: 14px; }
+.hero-trust span { display: flex; align-items: center; gap: 5px; }
+
+/* ── PROVA SOCIAL RÁPIDA ── */
+.prova-rapida { background: var(--cinza-100); padding: 48px 24px; }
+.prova-rapida h2 { text-align: center; margin-bottom: 36px; font-size: clamp(20px, 3vw, 30px); }
+.depos-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+@media(max-width:640px){ .depos-grid { grid-template-columns: 1fr; } }
+.dep-card { background: var(--branco); border-radius: 14px; padding: 20px; border: 1px solid #e5e7eb; }
+.dep-stars { color: var(--amarelo); font-size: 14px; margin-bottom: 10px; }
+.dep-texto { font-size: 14px; line-height: 1.6; color: var(--cinza-700); font-style: italic; margin-bottom: 12px; }
+.dep-autor { font-size: 12px; font-weight: 700; color: var(--cinza-400); text-transform: uppercase; letter-spacing: 0.06em; }
+
+/* ── DOR ── */
+.dor { padding: 72px 24px; text-align: center; }
+.dor h2 { margin-bottom: 12px; }
+.dor-intro { font-size: 18px; color: var(--cinza-400); margin-bottom: 48px; }
+.ruminacao { display: flex; flex-direction: column; gap: 14px; max-width: 560px; margin: 0 auto 48px; }
+.rum-item { background: #fff8f0; border: 1.5px solid #fed7aa; border-radius: 12px; padding: 16px 20px; font-size: 15px; color: #92400e; text-align: left; display: flex; gap: 10px; align-items: flex-start; line-height: 1.5; }
+.rum-icon { flex-shrink: 0; font-size: 18px; }
+.dor-ponte { background: var(--preto); color: var(--branco); border-radius: 20px; padding: 36px; max-width: 640px; margin: 0 auto; text-align: left; }
+.dor-ponte h3 { color: var(--branco); font-size: clamp(18px, 2.5vw, 26px); line-height: 1.3; margin-bottom: 16px; }
+.dor-ponte p { color: #9ca3af; font-size: 16px; }
+.dor-ponte strong { color: var(--verde); }
+
+/* ── O QUE VAI RECEBER ── */
+.entregaveis { background: var(--cinza-100); padding: 72px 24px; }
+.entregaveis h2 { text-align: center; margin-bottom: 8px; }
+.entregaveis-sub { text-align: center; color: var(--cinza-400); font-size: 16px; margin-bottom: 48px; }
+.entrega-lista { display: flex; flex-direction: column; gap: 16px; }
+.entrega-item { background: var(--branco); border-radius: 16px; padding: 24px; display: flex; gap: 20px; align-items: flex-start; border: 1px solid #e5e7eb; }
+.entrega-icon { font-size: 32px; flex-shrink: 0; }
+.entrega-titulo { font-family: 'Sora', sans-serif; font-size: 17px; font-weight: 800; color: var(--preto); margin-bottom: 6px; }
+.entrega-desc { font-size: 14px; color: var(--cinza-400); line-height: 1.6; }
+
+/* ── PARA QUEM É ── */
+.pra-quem { padding: 72px 24px; }
+.pra-quem h2 { text-align: center; margin-bottom: 48px; }
+.pq-lista { display: flex; flex-direction: column; gap: 12px; }
+.pq-item { display: flex; gap: 16px; align-items: flex-start; background: var(--cinza-100); border-radius: 14px; padding: 20px 24px; }
+.pq-check { width: 28px; height: 28px; background: var(--verde); border-radius: 8px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--branco); font-weight: 800; font-size: 14px; margin-top: 2px; }
+.pq-titulo { font-weight: 700; font-size: 16px; color: var(--preto); margin-bottom: 4px; }
+.pq-desc { font-size: 14px; color: var(--cinza-400); line-height: 1.5; }
+.pq-fechamento { background: var(--preto); color: var(--branco); border-radius: 14px; padding: 24px 28px; margin-top: 24px; font-size: 18px; font-weight: 700; text-align: center; line-height: 1.5; }
+.pq-fechamento em { font-style: normal; color: var(--verde); }
+
+/* ── RECAPITULAÇÃO ── */
+.recap { background: var(--preto); color: var(--branco); padding: 72px 24px; text-align: center; }
+.recap h2 { color: var(--branco); margin-bottom: 8px; }
+.recap-sub { color: #6b7280; margin-bottom: 48px; }
+.recap-lista { display: flex; flex-direction: column; gap: 10px; max-width: 500px; margin: 0 auto 40px; text-align: left; }
+.recap-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+.recap-nome { font-size: 15px; color: #d1d5db; }
+.recap-valor { font-size: 14px; color: #6b7280; text-decoration: line-through; }
+.recap-total { background: rgba(29,184,126,0.1); border: 1px solid rgba(29,184,126,0.3); border-radius: 12px; padding: 16px 24px; max-width: 500px; margin: 0 auto 16px; }
+.recap-total-label { font-size: 13px; color: #9ca3af; margin-bottom: 4px; }
+.recap-total-val { font-size: 14px; color: #6b7280; text-decoration: line-through; }
+.recap-mas { font-size: 14px; color: #9ca3af; margin: 24px 0 8px; }
+
+/* ── PREÇO ── */
+.preco-bloco { background: var(--preto); padding: 0 24px 72px; }
+.preco-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 580px; margin: 0 auto; }
+@media(max-width:500px){ .preco-cards { grid-template-columns: 1fr; } }
+.pc { border-radius: 20px; padding: 28px 24px; text-align: center; }
+.pc-mensal { background: rgba(255,255,255,0.05); border: 1.5px solid rgba(255,255,255,0.1); }
+.pc-anual { background: rgba(29,184,126,0.12); border: 2px solid var(--verde); position: relative; }
+.pc-badge { position: absolute; top: -14px; left: 50%; transform: translateX(-50%); background: var(--verde); color: var(--branco); font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; padding: 5px 14px; border-radius: 100px; white-space: nowrap; }
+.pc-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: #6b7280; margin-bottom: 12px; }
+.pc-preco { font-family: 'Sora', sans-serif; font-size: 38px; font-weight: 900; line-height: 1; margin-bottom: 4px; }
+.pc-mensal .pc-preco { color: var(--branco); }
+.pc-anual .pc-preco { color: var(--verde); }
+.pc-periodo { font-size: 12px; color: #6b7280; margin-bottom: 20px; }
+.pc-anual .pc-economia { font-size: 12px; color: var(--verde); font-weight: 700; margin-bottom: 20px; }
+.pc-lista { text-align: left; margin-bottom: 20px; }
+.pc-item { font-size: 13px; color: #9ca3af; display: flex; gap: 8px; margin-bottom: 8px; }
+.pc-item span { color: var(--verde); font-weight: 700; }
+.pc-btn { display: block; background: rgba(255,255,255,0.08); color: var(--branco); border-radius: 10px; padding: 12px; font-size: 14px; font-weight: 700; text-decoration: none; font-family: 'Sora', sans-serif; transition: background 0.2s; }
+.pc-btn:hover { background: rgba(255,255,255,0.15); }
+.pc-anual .pc-btn { background: var(--verde); }
+.pc-anual .pc-btn:hover { background: var(--verde-esc); }
+.garantia-bloco { max-width: 580px; margin: 24px auto 0; background: rgba(29,184,126,0.08); border: 1px solid rgba(29,184,126,0.2); border-radius: 14px; padding: 20px 24px; display: flex; gap: 16px; align-items: flex-start; }
+.garantia-bloco-icon { font-size: 28px; flex-shrink: 0; }
+.garantia-titulo { font-weight: 700; font-size: 15px; color: var(--branco); margin-bottom: 4px; }
+.garantia-texto { font-size: 13px; color: #6b7280; line-height: 1.5; }
+.seguro-nota { text-align: center; font-size: 12px; color: #4b5563; margin-top: 16px; }
+
+/* ── COMO FUNCIONA ── */
+.como { padding: 72px 24px; background: var(--cinza-100); }
+.como h2 { text-align: center; margin-bottom: 48px; }
+.como-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media(max-width:600px){ .como-steps { grid-template-columns: 1fr; } }
+.como-step { text-align: center; }
+.como-num { width: 48px; height: 48px; background: var(--verde); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px; font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 900; color: var(--branco); }
+.como-titulo { font-weight: 700; font-size: 16px; color: var(--preto); margin-bottom: 6px; }
+.como-desc { font-size: 14px; color: var(--cinza-400); line-height: 1.5; }
+
+/* ── DUAS OPÇÕES ── */
+.opcoes { padding: 72px 24px; }
+.opcoes h2 { text-align: center; margin-bottom: 48px; }
+.opcoes-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; max-width: 680px; margin: 0 auto; }
+@media(max-width:560px){ .opcoes-grid { grid-template-columns: 1fr; } }
+.op { border-radius: 18px; padding: 28px 24px; }
+.op-ruim { background: #fef2f2; border: 2px solid #fecaca; }
+.op-boa { background: var(--verde-bg); border: 2px solid rgba(29,184,126,0.4); }
+.op-num { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+.op-ruim .op-num { color: #dc2626; }
+.op-boa .op-num { color: var(--verde-esc); }
+.op-titulo { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; margin-bottom: 12px; }
+.op-ruim .op-titulo { color: #991b1b; }
+.op-boa .op-titulo { color: #064e3b; }
+.op-desc { font-size: 14px; line-height: 1.6; }
+.op-ruim .op-desc { color: #b91c1c; }
+.op-boa .op-desc { color: #065f46; }
+.opcoes-concl { text-align: center; margin-top: 32px; font-size: 18px; font-weight: 700; color: var(--preto); }
+.opcoes-concl em { font-style: normal; color: var(--verde); }
+
+/* ── AUTORIDADE ── */
+.autoridade { background: var(--cinza-100); padding: 72px 24px; }
+.autoridade-inner { max-width: 640px; margin: 0 auto; display: flex; gap: 32px; align-items: flex-start; }
+@media(max-width:560px){ .autoridade-inner { flex-direction: column; } }
+.autor-foto { width: 100px; height: 100px; border-radius: 50%; background: var(--cinza-400); flex-shrink: 0; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 36px; }
+.autor-nome { font-family: 'Sora', sans-serif; font-weight: 900; font-size: 22px; color: var(--preto); margin-bottom: 8px; }
+.autor-bio { font-size: 15px; color: var(--cinza-700); line-height: 1.7; }
+
+/* ── FAQ ── */
+.faq { padding: 72px 24px; }
+.faq h2 { text-align: center; margin-bottom: 48px; }
+.faq-lista { max-width: 640px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
+.faq-item { border: 1.5px solid #e5e7eb; border-radius: 12px; overflow: hidden; }
+.faq-q { padding: 18px 20px; font-size: 15px; font-weight: 700; color: var(--preto); cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+.faq-a { padding: 0 20px 18px; font-size: 14px; color: var(--cinza-400); line-height: 1.6; display: none; }
+.faq-item.open .faq-a { display: block; }
+.faq-item.open .faq-arrow { transform: rotate(180deg); }
+.faq-arrow { transition: transform 0.2s; font-size: 12px; color: var(--cinza-400); }
+
+/* ── CTA FINAL ── */
+.cta-final { background: var(--verde); padding: 72px 24px; text-align: center; }
+.cta-final h2 { color: var(--branco); margin-bottom: 12px; font-size: clamp(24px, 4vw, 38px); }
+.cta-final p { color: rgba(255,255,255,0.8); font-size: 17px; margin-bottom: 36px; }
+.btn-final { background: var(--branco); color: var(--verde-esc); font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 900; padding: 20px 48px; border-radius: 14px; text-decoration: none; display: inline-block; box-shadow: 0 8px 32px rgba(0,0,0,0.2); transition: transform 0.15s; }
+.btn-final:hover { transform: translateY(-2px); }
+.cta-trust { margin-top: 20px; color: rgba(255,255,255,0.7); font-size: 13px; display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+
+/* ── FOOTER ── */
+footer { background: var(--preto); color: #4b5563; text-align: center; padding: 32px 24px; font-size: 13px; }
+footer a { color: #4b5563; text-decoration: underline; }
+footer a:hover { color: var(--verde); }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">🔥 Preço de lançamento: R$7,90/mês — valor pode subir sem aviso. Garanta agora.</div>
+
+<!-- LOGO -->
+<div class="logo-bar"><span>Dashboard <em>Financeiro</em></span></div>
+
+<!-- ── DOBRA 1: HERO ── -->
+<section class="hero">
+  <div class="inner-sm">
+    <div class="eyebrow" style="color:var(--verde)">Entenda sua vida financeira</div>
+    <h1>Em <em>10 segundos</em> você sabe exatamente pra onde foi o seu dinheiro.</h1>
+    <p class="hero-sub" style="margin-top:20px">Sem planilhas. Sem caderno. Sem conta de cabeça. Um painel visual que organiza saldo, gastos, metas e gráficos automaticamente.</p>
+    <p class="hero-preco">Por menos de R$8 por mês.</p>
+    <div class="btn-wrap">
+      <a href="#preco" class="btn">→ Quero meu Dashboard agora</a>
+    </div>
+    <div class="hero-trust">
+      <span>🔒 Pagamento seguro</span>
+      <span>✅ Acesso imediato</span>
+      <span>🛡️ 7 dias de garantia</span>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 2: PROVA SOCIAL RÁPIDA ── -->
+<section class="prova-rapida">
+  <div class="inner-lg">
+    <h2>Veja o que quem já usa está dizendo</h2>
+    <div class="depos-grid">
+      <div class="dep-card">
+        <div class="dep-stars">⭐⭐⭐⭐⭐</div>
+        <p class="dep-texto">"Nunca dou certo com nada, nem planilha ou papel — e do jeito que você fez ficou super prático."</p>
+        <div class="dep-autor">Cliente Dashboard Financeiro · WhatsApp</div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-stars">⭐⭐⭐⭐⭐</div>
+        <p class="dep-texto">"Já faz um tempo que venho testando várias ferramentas de organização financeira e posso dizer que a sua é uma das melhores até agora."</p>
+        <div class="dep-autor">Cliente Dashboard Financeiro · WhatsApp</div>
+      </div>
+      <div class="dep-card">
+        <div class="dep-stars">⭐⭐⭐⭐⭐</div>
+        <p class="dep-texto">"Passei o fds organizando todo o dashboard!! Muito obrigado por compartilhar, bem prático e intuitivo pra organizar o financeiro."</p>
+        <div class="dep-autor">Cliente Dashboard Financeiro · Instagram</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 3: DOR + RUMINAÇÃO ── -->
+<section class="dor">
+  <div class="inner">
+    <div class="eyebrow">Fala a verdade...</div>
+    <h2>Você já tentou se organizar financeiramente — e não conseguiu manter.</h2>
+    <p class="dor-intro">Toda vez que você senta pra tentar, um desses pensamentos aparece:</p>
+
+    <div class="ruminacao">
+      <div class="rum-item"><div class="rum-icon">😩</div><div>"Baixei uma planilha, funcionou uma semana — depois a fórmula quebrou e eu desisti."</div></div>
+      <div class="rum-item"><div class="rum-icon">📓</div><div>"Anotei no caderno por uns dias, perdi a folha e não sei mais o que paguei ou não."</div></div>
+      <div class="rum-item"><div class="rum-icon">📱</div><div>"Tenho tudo espalhado — print do extrato, boleto salvo na foto, app do banco que não soma nada."</div></div>
+      <div class="rum-item"><div class="rum-icon">😰</div><div>"Chego no dia 30 sem entender pra onde foi o dinheiro. Mesmo trabalhando, mesmo ganhando bem."</div></div>
+      <div class="rum-item"><div class="rum-icon">🔄</div><div>"Todo janeiro eu prometo que esse mês vai ser diferente. E todo fevereiro eu abandono de novo."</div></div>
+    </div>
+
+    <div class="dor-ponte">
+      <h3>Mas e se você pudesse abrir o celular e, <strong>em 10 segundos</strong>, saber exatamente quanto tem, quanto gastou e pra onde foi cada centavo — sem planilha, sem caderno, sem esforço nenhum?</h3>
+      <p style="margin-top:16px">Isso mudaria a forma como você toma decisões com o seu dinheiro. E é exatamente isso que o Dashboard Financeiro faz por você.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 4: O QUE VAI RECEBER ── -->
+<section class="entregaveis">
+  <div class="inner">
+    <div class="eyebrow" style="text-align:center">O que você recebe</div>
+    <h2 style="text-align:center">Tudo que você vai acessar com o Dashboard Financeiro</h2>
+    <p class="entregaveis-sub">Não é só um painel. É o pacote completo.</p>
+    <div class="entrega-lista">
+
+      <div class="entrega-item">
+        <div class="entrega-icon">📊</div>
+        <div>
+          <div class="entrega-titulo">Dashboard completo — saldo, gastos, metas e gráficos</div>
+          <div class="entrega-desc">Tudo numa única tela, atualizado a cada lançamento. Você vê o mês inteiro em menos de 30 segundos — sem abrir planilha, sem procurar em apps diferentes.</div>
+        </div>
+      </div>
+
+      <div class="entrega-item">
+        <div class="entrega-icon">📥</div>
+        <div>
+          <div class="entrega-titulo">Importação de extratos e faturas</div>
+          <div class="entrega-desc">Chega de digitar gasto por gasto. Importe o extrato do banco ou a fatura do cartão em poucos cliques — o Dashboard categoriza tudo automaticamente.</div>
+        </div>
+      </div>
+
+      <div class="entrega-item">
+        <div class="entrega-icon">👤</div>
+        <div>
+          <div class="entrega-titulo">Múltiplos perfis — pessoal e negócio separados</div>
+          <div class="entrega-desc">Organize sua vida pessoal e seu negócio na mesma conta, sem misturar. Ideal pra autônomos, MEIs e pequenos empreendedores.</div>
+        </div>
+      </div>
+
+      <div class="entrega-item">
+        <div class="entrega-icon">🎯</div>
+        <div>
+          <div class="entrega-titulo">Metas que acompanham sua evolução</div>
+          <div class="entrega-desc">Defina metas e veja o avanço em tempo real. Decisão baseada em dado, não em achismo ou estimativa no fim do mês.</div>
+        </div>
+      </div>
+
+      <div class="entrega-item">
+        <div class="entrega-icon">📄</div>
+        <div>
+          <div class="entrega-titulo">Relatórios em PDF em segundos</div>
+          <div class="entrega-desc">Relatório mensal ou anual gerado automaticamente — sem montar documento nenhum na mão.</div>
+        </div>
+      </div>
+
+      <div class="entrega-item">
+        <div class="entrega-icon">📱</div>
+        <div>
+          <div class="entrega-titulo">Funciona no celular e no computador</div>
+          <div class="entrega-desc">Recebeu um Pix na rua? Lança na hora, direto do bolso. A maioria dos gastos acontece fora de casa — o Dashboard vai com você.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 5: PRA QUEM É ── -->
+<section class="pra-quem">
+  <div class="inner">
+    <h2>O Dashboard Financeiro é pra você que:</h2>
+    <div class="pq-lista">
+
+      <div class="pq-item">
+        <div class="pq-check">✓</div>
+        <div>
+          <div class="pq-titulo">Anota no caderno ou no papel</div>
+          <div class="pq-desc">E perde a folha, esquece de lançar, ou não consegue saber com certeza se aquela conta foi paga ou não.</div>
+        </div>
+      </div>
+
+      <div class="pq-item">
+        <div class="pq-check">✓</div>
+        <div>
+          <div class="pq-titulo">Usa planilha mas não consegue manter</div>
+          <div class="pq-desc">A fórmula quebra, a semana fica corrida, e o controle que parecia simples vai ficando pra depois — até sumir.</div>
+        </div>
+      </div>
+
+      <div class="pq-item">
+        <div class="pq-check">✓</div>
+        <div>
+          <div class="pq-titulo">Tem tudo espalhado em vários lugares</div>
+          <div class="pq-desc">Nota no celular, print do extrato, boleto salvo na foto, app de banco que não soma nada. A informação existe, mas está em todo lugar ao mesmo tempo.</div>
+        </div>
+      </div>
+
+      <div class="pq-item">
+        <div class="pq-check">✓</div>
+        <div>
+          <div class="pq-titulo">Chega no fim do mês sem entender onde foi o dinheiro</div>
+          <div class="pq-desc">Mesmo trabalhando, mesmo ganhando bem. A sensação de que o dinheiro some sem explicação é mais comum do que parece — e tem solução.</div>
+        </div>
+      </div>
+
+      <div class="pq-item">
+        <div class="pq-check">✓</div>
+        <div>
+          <div class="pq-titulo">Quer controle sem precisar virar especialista em finanças</div>
+          <div class="pq-desc">Sem aprender fórmula, sem entender de contabilidade, sem dedicar horas por semana. Só abrir, lançar e entender.</div>
+        </div>
+      </div>
+
+    </div>
+    <div class="pq-fechamento">
+      Se você se reconheceu em qualquer um desses, <em>o Dashboard foi feito pra você.</em>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 6: DEPOIMENTO DESTAQUE ── -->
+<section style="background:var(--cinza-100);padding:48px 24px;">
+  <div class="inner-sm" style="text-align:center">
+    <div style="font-size:32px;margin-bottom:16px">💬</div>
+    <p style="font-size:20px;font-style:italic;color:var(--preto);font-weight:600;line-height:1.5;margin-bottom:16px">"Lari, eu comprei e é muito bom viu. Amei! <span style="color:var(--verde)">Melhor investimento!!</span>"</p>
+    <div style="font-size:13px;color:var(--cinza-400);font-weight:700;text-transform:uppercase;letter-spacing:0.06em">Cliente Dashboard Financeiro · Instagram</div>
+  </div>
+</section>
+
+<!-- ── DOBRA 7: RECAPITULAÇÃO + PREÇO ── -->
+<section class="recap" id="preco">
+  <div class="inner">
+    <div class="eyebrow" style="color:var(--verde);text-align:center">Recapitulando</div>
+    <h2 style="color:var(--branco);text-align:center">Tudo que você vai receber</h2>
+    <p class="recap-sub">Somando tudo, quanto valeria?</p>
+
+    <div class="recap-lista">
+      <div class="recap-row"><span class="recap-nome">Dashboard completo + gráficos</span><span class="recap-valor">R$97,00</span></div>
+      <div class="recap-row"><span class="recap-nome">Importação de extratos e faturas</span><span class="recap-valor">R$47,00</span></div>
+      <div class="recap-row"><span class="recap-nome">Múltiplos perfis (pessoal + negócio)</span><span class="recap-valor">R$47,00</span></div>
+      <div class="recap-row"><span class="recap-nome">Metas e relatórios em PDF</span><span class="recap-valor">R$37,00</span></div>
+      <div class="recap-row"><span class="recap-nome">Acesso no celular e no computador</span><span class="recap-valor">R$27,00</span></div>
+    </div>
+
+    <div class="recap-total">
+      <div class="recap-total-label">Valor total</div>
+      <div class="recap-total-val">R$255,00</div>
+    </div>
+
+    <p class="recap-mas">Mas você não vai pagar R$255,00. Nem R$97,00. Nem R$49,90.</p>
+    <h2 style="color:var(--branco);text-align:center;font-size:clamp(20px,3vw,28px);margin-bottom:8px">Escolha como quer continuar no controle das suas finanças:</h2>
+    <p style="color:#6b7280;text-align:center;margin-bottom:36px;font-size:15px">Por menos de R$8 por mês, seu Dashboard nunca para de evoluir — toda atualização chega sem custo extra.</p>
+  </div>
+</section>
+
+<!-- CARDS DE PREÇO -->
+<section class="preco-bloco">
+  <div class="preco-cards">
+
+    <div class="pc pc-mensal">
+      <div class="pc-label">Mensal</div>
+      <div class="pc-preco">R$29,90<span style="font-size:16px;font-weight:400;color:#6b7280">/mês</span></div>
+      <div class="pc-periodo">cobrado todo mês · cancele quando quiser</div>
+      <div class="pc-lista">
+        <div class="pc-item"><span>✓</span> Dashboard completo</div>
+        <div class="pc-item"><span>✓</span> Importação de extratos</div>
+        <div class="pc-item"><span>✓</span> Múltiplos perfis</div>
+        <div class="pc-item"><span>✓</span> Gráficos e relatórios</div>
+        <div class="pc-item"><span>✓</span> Celular e computador</div>
+      </div>
+      <a href="https://pay.kiwify.com.br/JTbi7bF" class="pc-btn">Quero o plano mensal</a>
+    </div>
+
+    <div class="pc pc-anual">
+      <div class="pc-badge">🔥 +70% de desconto</div>
+      <div class="pc-label">Anual</div>
+      <div class="pc-preco">R$7,90<span style="font-size:14px;font-weight:400;color:#9ca3af">/mês</span></div>
+      <div class="pc-periodo">Apenas uma vez por ano · R$94,80 à vista</div>
+      <div class="pc-anual pc-economia">economize R$264,00 no plano anual</div>
+      <div class="pc-lista">
+        <div class="pc-item"><span>✓</span> Dashboard completo</div>
+        <div class="pc-item"><span>✓</span> Importação de extratos</div>
+        <div class="pc-item"><span>✓</span> Múltiplos perfis</div>
+        <div class="pc-item"><span>✓</span> Gráficos e relatórios</div>
+        <div class="pc-item"><span>✓</span> Celular e computador</div>
+      </div>
+      <a href="https://pay.kiwify.com.br/xdxSBKU" class="pc-btn">Quero o plano anual</a>
+    </div>
+
+  </div>
+
+  <div class="garantia-bloco" style="max-width:580px;margin:24px auto 0;">
+    <div class="garantia-bloco-icon">🛡️</div>
+    <div>
+      <div class="garantia-titulo">Garantia incondicional de 7 dias</div>
+      <div class="garantia-texto">Use o Dashboard por 7 dias. Se por qualquer motivo não for pra você, manda um e-mail e devolvemos 100% do valor — sem pergunta, sem burocracia, sem enrolação.</div>
+    </div>
+  </div>
+  <p class="seguro-nota">🔒 Não conectamos ao seu banco · Seus dados ficam seguros e sob seu controle</p>
+</section>
+
+<!-- ── DOBRA 8: COMO FUNCIONA O ACESSO ── -->
+<section class="como">
+  <div class="inner-lg">
+    <h2>Comprou agora. Acessa agora.</h2>
+    <div class="como-steps" style="margin-top:40px">
+      <div class="como-step">
+        <div class="como-num">1</div>
+        <div class="como-titulo">Finalize o pagamento</div>
+        <div class="como-desc">Pix ou cartão de crédito. 100% seguro pela plataforma.</div>
+      </div>
+      <div class="como-step">
+        <div class="como-num">2</div>
+        <div class="como-titulo">Receba no e-mail</div>
+        <div class="como-desc">Assim que o pagamento for confirmado, você recebe o acesso imediatamente.</div>
+      </div>
+      <div class="como-step">
+        <div class="como-num">3</div>
+        <div class="como-titulo">Abra e entenda tudo</div>
+        <div class="como-desc">Em 10 segundos você já sabe quanto tem, quanto gastou e pra onde foi o dinheiro.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 9: DUAS OPÇÕES ── -->
+<section class="opcoes">
+  <div class="inner">
+    <h2>Agora você tem duas escolhas:</h2>
+    <div class="opcoes-grid">
+      <div class="op op-ruim">
+        <div class="op-num">✗ Opção 1</div>
+        <div class="op-titulo">Continuar sem saber pra onde vai o dinheiro</div>
+        <div class="op-desc">Fechar mais um mês sem entender os gastos. Prometer que o próximo mês vai ser diferente. Repetir o ciclo.</div>
+      </div>
+      <div class="op op-boa">
+        <div class="op-num">✓ Opção 2</div>
+        <div class="op-titulo">Abrir o Dashboard e saber em 10 segundos</div>
+        <div class="op-desc">Acessar o painel, ver saldo, gastos e metas numa tela só — e finalmente entender pra onde está indo cada centavo.</div>
+      </div>
+    </div>
+    <p class="opcoes-concl">Eu sei — e você também sabe — <em>qual é a opção certa.</em></p>
+    <div class="btn-wrap"><a href="#preco" class="btn">→ Quero meu Dashboard agora</a></div>
+  </div>
+</section>
+
+<!-- ── DOBRA 10: AUTORIDADE ── -->
+<section class="autoridade">
+  <div class="autoridade-inner">
+    <div class="autor-foto">👩</div>
+    <div>
+      <div class="autor-nome">Lari Tedeschi</div>
+      <p class="autor-bio">Designer e criadora do Dashboard Financeiro. Depois de testar planilhas, cadernos e apps sem conseguir manter o hábito, criou um painel visual que faz o trabalho pesado — e que hoje é usado por centenas de pessoas que finalmente entenderam pra onde vai o dinheiro delas.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ── DOBRA 11: FAQ ── -->
+<section class="faq">
+  <div class="inner">
+    <h2>Perguntas frequentes</h2>
+    <div class="faq-lista">
+
+      <div class="faq-item open">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O Dashboard funciona para qualquer pessoa? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim. Ele foi feito pra quem usa caderno, planilha, app ou nada — qualquer pessoa que queira entender pra onde vai o dinheiro, sem precisar de conhecimento técnico.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Não tenho conhecimento prévio. Consigo usar? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim. O Dashboard foi desenvolvido exatamente pra quem nunca usou nenhuma ferramenta de controle financeiro. Você abre, lança e já vê tudo organizado.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">O Dashboard se conecta com a minha conta do banco? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Não. Você mesma importa o extrato em poucos cliques. Seus dados ficam sempre no seu controle — nunca pedimos login, senha ou acesso à sua conta bancária.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Qual a diferença entre o plano mensal e o anual? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Os dois têm acesso completo ao Dashboard. A diferença é o valor: no anual você paga R$94,80 uma única vez e economiza R$264,00 em relação ao mensal ao longo do ano.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Posso cancelar quando quiser? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Sim. Sem multa, sem burocracia. Você cancela quando quiser pela plataforma.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">Como recebo meu acesso? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Assim que o pagamento for confirmado, você recebe os dados de acesso direto no seu e-mail. Tudo imediato.</div>
+      </div>
+
+      <div class="faq-item">
+        <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">E se eu não gostar? <span class="faq-arrow">▼</span></div>
+        <div class="faq-a">Você tem 7 dias de garantia total. Se por qualquer motivo não for pra você, manda um e-mail e devolvemos 100% do valor — sem pergunta, sem burocracia.</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ── CTA FINAL ── -->
+<section class="cta-final">
+  <div class="inner-sm">
+    <h2>Garanta o preço de lançamento antes que ele suba.</h2>
+    <p>R$7,90/mês — ou R$29,90/mês. Acesso imediato. 7 dias de garantia.</p>
+    <a href="#preco" class="btn-final">→ Quero organizar minhas finanças</a>
+    <div class="cta-trust">
+      <span>✅ Acesso imediato</span>
+      <span>🛡️ 7 dias de garantia</span>
+      <span>🔒 Dados seguros</span>
+      <span>📱 Celular e computador</span>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 Dashboard Financeiro, Lari Tedeschi</p>
+  <p style="margin-top:8px"><a href="https://docs.google.com/document/d/1nTM8njyugzgFsqLTX_Selr1AcGhyU-b_VIpJMPb0Lxg/view" target="_blank" rel="noopener">Termos de Uso e Privacidade</a> &nbsp;·&nbsp; <a href="https://wa.me/5541999401055" target="_blank" rel="noopener">Fale com o suporte</a></p>
+</footer>
+
+<script>
+// FAQ toggle já está inline no onclick
+</script>
+</body>
+</html>
