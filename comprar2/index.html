@@ -1,1293 +1,329 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
+<!doctype html>
+<html lang="pt-BR" class="tema-claro">
 <head>
-  <meta name="facebook-domain-verification" content="nqpyt2wq9vay-zaxpt98kt2epjto2ts" />
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard Financeiro — Entenda suas finanças em segundos</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Sora:wght@400;600;700;800&display=swap');
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="facebook-domain-verification" content="nqpyt2wq9vay-zaxpt98kt2epjto2ts" />
+<title>Dashboard Financeiro · Entenda sua vida financeira em segundos | Lari Tedeschi</title>
+<meta name="description" content="Um painel visual que mostra saldo, gastos, receitas, metas e gráficos automaticamente, no computador e no celular. Sem planilha e sem fórmula.">
+<link rel="canonical" href="https://dashboardfinanceiro.com/comprar2/">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dashboard Financeiro · Entenda sua vida financeira em segundos">
+<meta property="og:description" content="Saldo, gastos, receitas, metas e gráficos num painel só. Sem planilha e sem fórmula.">
+<meta property="og:url" content="https://dashboardfinanceiro.com/comprar2/">
+<meta property="og:image" content="https://dashboardfinanceiro.com/assets/img/dashboard/hero.webp">
+<meta name="theme-color" content="#f3f1f3">
+<!-- Dashboard Financeiro · versão de tráfego 2 ("Chega de Excel"), no tema da escola -->
 
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --verde: #1DB87E;
-    --verde-escuro: #17a06d;
-    --verde-claro: #e8f9f2;
-    --cinza-900: #0f1117;
-    --cinza-800: #1a1d27;
-    --cinza-700: #252836;
-    --cinza-500: #6b7280;
-    --cinza-300: #d1d5db;
-    --cinza-100: #f3f4f6;
-    --branco: #ffffff;
-    --vermelho-suave: #fff1f0;
-    --vermelho: #ef4444;
-    --amarelo: #f59e0b;
-  }
-
-  html { scroll-behavior: smooth; }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--branco);
-    color: var(--cinza-900);
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-  }
-
-  .topbar {
-    position: sticky;
-    top: 0; left: 0; right: 0;
-    background: var(--vermelho);
-    color: var(--branco);
-    text-align: center;
-    padding: 10px 16px;
-    font-size: 13px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    line-height: 1.4;
-    z-index: 1000;
-  }
-
-  .hero {
-    background: var(--cinza-900);
-    color: var(--branco);
-    padding: 64px 24px 72px;
-    text-align: center;
-  }
-
-  .hero-eyebrow {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: rgba(29,184,126,0.15);
-    border: 1px solid rgba(29,184,126,0.3);
-    color: var(--verde);
-    font-size: 12px;
-    font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    padding: 5px 12px;
-    border-radius: 100px;
-    margin-bottom: 28px;
-  }
-
-  .hero h1 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(32px, 5vw, 58px);
-    font-weight: 800;
-    line-height: 1.12;
-    max-width: 760px;
-    margin: 0 auto 20px;
-    letter-spacing: -0.02em;
-  }
-  .hero h1 em {
-    font-style: normal;
-    color: var(--verde);
-  }
-
-  .hero-sub {
-    font-size: clamp(16px, 2vw, 20px);
-    color: #9ca3af;
-    max-width: 540px;
-    margin: 0 auto 8px;
-    line-height: 1.6;
-  }
-
-  .hero-price-line {
-    font-family: 'Sora', sans-serif;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--verde);
-    margin-bottom: 32px;
-  }
-
-  .hero-cta-wrap {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-  }
-
-  .btn-primary {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--verde);
-    color: var(--branco);
-    font-family: 'Sora', sans-serif;
-    font-size: 17px;
-    font-weight: 700;
-    padding: 18px 36px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
-    box-shadow: 0 4px 24px rgba(29,184,126,0.35);
-  }
-  .btn-primary:hover { background: var(--verde-escuro); transform: translateY(-1px); }
-  .btn-primary:active { transform: translateY(0); }
-
-  .btn-outline-v {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    background: transparent;
-    color: var(--verde);
-    border: 2px solid rgba(29,184,126,0.4);
-    font-family: 'Sora', sans-serif;
-    font-size: 15px;
-    font-weight: 700;
-    padding: 14px 26px;
-    border-radius: 12px;
-    text-decoration: none;
-    transition: transform .15s ease, border-color .15s ease;
-  }
-  .btn-outline-v:hover { border-color: var(--verde); transform: translateY(-1px); }
-
-  .hero-trust {
-    font-size: 13px;
-    color: #6b7280;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 16px;
-    flex-wrap: wrap;
-  }
-  .hero-trust span { display: flex; align-items: center; gap: 4px; }
-
-  .mockup-section {
-    background: var(--cinza-900);
-    padding: 0 24px 72px;
-    display: flex;
-    justify-content: center;
-  }
-
-  .mockup-card {
-    background: var(--cinza-800);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 24px;
-    max-width: 780px;
-    width: 100%;
-    box-shadow: 0 32px 80px rgba(0,0,0,0.5);
-  }
-
-  .mock-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-  }
-  .mock-dots { display: flex; gap: 6px; }
-  .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
-  .mock-dot:nth-child(1) { background: #ef4444; }
-  .mock-dot:nth-child(2) { background: #f59e0b; }
-  .mock-dot:nth-child(3) { background: #22c55e; }
-  .mock-title { font-size: 12px; color: #6b7280; font-weight: 500; }
-
-  .mock-cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  @media (max-width: 600px) { .mock-cards { grid-template-columns: repeat(2, 1fr); } }
-
-  .mock-stat {
-    background: var(--cinza-700);
-    border-radius: 10px;
-    padding: 14px;
-  }
-  .mock-stat-label { font-size: 10px; color: #6b7280; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px; }
-  .mock-stat-value { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 700; color: var(--branco); }
-  .mock-stat-value.verde { color: var(--verde); }
-  .mock-stat-value.vermelho { color: #ef4444; }
-  .mock-stat-delta { font-size: 11px; color: var(--verde); margin-top: 4px; }
-
-  .mock-chart {
-    background: var(--cinza-700);
-    border-radius: 10px;
-    padding: 16px;
-    margin-bottom: 12px;
-  }
-  .mock-chart-title { font-size: 11px; color: #9ca3af; font-weight: 600; margin-bottom: 12px; }
-  .mock-bars {
-    display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    height: 80px;
-  }
-  .mock-bar-group { display: flex; gap: 3px; align-items: flex-end; flex: 1; }
-  .mock-bar { border-radius: 4px 4px 0 0; flex: 1; min-width: 10px; }
-
-  .mock-cats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-  .mock-cat-item {
-    background: var(--cinza-700);
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  .mock-cat-name { font-size: 11px; color: #9ca3af; }
-  .mock-cat-bar-wrap { flex: 1; margin: 0 10px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; }
-  .mock-cat-bar { height: 100%; border-radius: 2px; }
-  .mock-cat-val { font-size: 11px; font-weight: 700; color: var(--branco); }
-
-  .checks-section {
-    padding: 80px 24px;
-    max-width: 760px;
-    margin: 0 auto;
-    text-align: center;
-  }
-
-  .section-label {
-    font-size: 12px;
-    font-weight: 700;
-    color: var(--verde);
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    margin-bottom: 12px;
-  }
-
-  .checks-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-  }
-
-  .checks-intro {
-    color: var(--cinza-500);
-    font-size: 17px;
-    margin-bottom: 40px;
-    max-width: 520px;
-    margin-left: auto;
-    margin-right: auto;
-  }
-
-  .checks-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-    text-align: left;
-    margin-bottom: 32px;
-  }
-  @media (max-width: 520px) { .checks-grid { grid-template-columns: 1fr; } }
-
-  .check-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    background: var(--verde-claro);
-    border: 1px solid rgba(29,184,126,0.2);
-    border-radius: 12px;
-    padding: 16px;
-  }
-  .check-icon {
-    width: 24px;
-    height: 24px;
-    background: var(--verde);
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-    color: white;
-    font-size: 13px;
-  }
-  .check-text { font-size: 15px; font-weight: 500; color: var(--cinza-900); line-height: 1.4; }
-
-  .checks-closing {
-    background: var(--cinza-900);
-    color: var(--branco);
-    border-radius: 16px;
-    padding: 24px 28px;
-    font-size: 16px;
-    line-height: 1.6;
-    text-align: left;
-  }
-  .checks-closing strong { color: var(--verde); }
-
-  .culpa-section {
-    background: var(--cinza-100);
-    padding: 80px 24px;
-  }
-  .culpa-inner {
-    max-width: 720px;
-    margin: 0 auto;
-  }
-  .culpa-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 38px);
-    font-weight: 800;
-    line-height: 1.2;
-    margin-bottom: 24px;
-    letter-spacing: -0.02em;
-  }
-  .culpa-section p {
-    font-size: 17px;
-    color: #374151;
-    line-height: 1.7;
-    margin-bottom: 20px;
-  }
-  .culpa-destaque {
-    background: var(--cinza-900);
-    color: var(--branco);
-    border-left: 4px solid var(--verde);
-    border-radius: 0 12px 12px 0;
-    padding: 20px 24px;
-    font-size: 18px;
-    font-weight: 600;
-    line-height: 1.5;
-    margin-top: 8px;
-  }
-  .culpa-destaque em {
-    font-style: normal;
-    color: var(--verde);
-  }
-
-  .antes-depois {
-    padding: 80px 24px;
-    max-width: 820px;
-    margin: 0 auto;
-  }
-  .antes-depois h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(24px, 3.5vw, 36px);
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 48px;
-    letter-spacing: -0.02em;
-  }
-  .ad-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 24px;
-  }
-  @media (max-width: 600px) { .ad-grid { grid-template-columns: 1fr; } }
-
-  .ad-card {
-    border-radius: 16px;
-    overflow: hidden;
-    border: 2px solid transparent;
-  }
-  .ad-card.antes { border-color: #fecaca; }
-  .ad-card.depois { border-color: rgba(29,184,126,0.4); }
-
-  .ad-card-header {
-    padding: 14px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ad-card.antes .ad-card-header { background: #fef2f2; color: #dc2626; }
-  .ad-card.depois .ad-card-header { background: var(--verde-claro); color: var(--verde-escuro); }
-
-  .ad-card-body { padding: 20px; background: var(--branco); }
-
-  .fake-excel { font-family: 'Courier New', monospace; font-size: 12px; }
-  .excel-toolbar {
-    background: #f0f0f0;
-    border: 1px solid #d0d0d0;
-    border-bottom: none;
-    padding: 6px 10px;
-    font-size: 11px;
-    color: #555;
-    border-radius: 6px 6px 0 0;
-  }
-  .excel-table { border-collapse: collapse; width: 100%; border: 1px solid #d0d0d0; }
-  .excel-table th, .excel-table td {
-    border: 1px solid #d0d0d0;
-    padding: 5px 8px;
-    font-size: 12px;
-  }
-  .excel-table th { background: #e8e8e8; color: #333; font-weight: 600; text-align: center; }
-  .excel-cell-ref { color: #16a34a; }
-  .excel-error { color: #dc2626; font-weight: 700; }
-  .excel-formula { color: #1d4ed8; }
-
-  .excel-warning {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-radius: 6px;
-    padding: 10px 12px;
-    margin-top: 12px;
-    font-size: 13px;
-    color: #dc2626;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  .fake-dash { }
-  .dash-topbar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .dash-title { font-size: 14px; font-weight: 700; color: var(--cinza-900); }
-  .dash-month { font-size: 12px; background: var(--verde-claro); color: var(--verde-escuro); padding: 3px 10px; border-radius: 100px; font-weight: 600; }
-  .mini-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
-  .mini-card { background: var(--cinza-100); border-radius: 8px; padding: 10px 12px; }
-  .mini-card-label { font-size: 10px; color: var(--cinza-500); font-weight: 600; margin-bottom: 4px; }
-  .mini-card-val { font-size: 16px; font-weight: 800; font-family: 'Sora', sans-serif; }
-  .mini-card-val.verde { color: var(--verde); }
-  .mini-card-val.red { color: #dc2626; }
-
-  .mini-progress { margin-top: 8px; }
-  .mini-progress-label { display: flex; justify-content: space-between; font-size: 11px; color: var(--cinza-500); margin-bottom: 5px; }
-  .mini-progress-bar { height: 6px; background: var(--cinza-300); border-radius: 3px; }
-  .mini-progress-fill { height: 100%; border-radius: 3px; background: var(--verde); }
-
-  .dash-cats { }
-  .dash-cat-row { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid var(--cinza-100); }
-  .dash-cat-row:last-child { border-bottom: none; }
-  .dash-cat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dash-cat-name { font-size: 12px; color: #374151; flex: 1; }
-  .dash-cat-bar-wrap { width: 80px; height: 4px; background: var(--cinza-300); border-radius: 2px; }
-  .dash-cat-bar-fill { height: 100%; border-radius: 2px; }
-  .dash-cat-val { font-size: 12px; font-weight: 700; color: var(--cinza-900); min-width: 52px; text-align: right; }
-
-  .dash-note {
-    background: var(--verde-claro);
-    border-radius: 6px;
-    padding: 8px 12px;
-    font-size: 12px;
-    color: var(--verde-escuro);
-    font-weight: 500;
-    margin-top: 10px;
-    display: flex;
-    gap: 6px;
-    align-items: center;
-  }
-
-  .pilares {
-    background: var(--cinza-900);
-    color: var(--branco);
-    padding: 80px 24px;
-  }
-  .pilares-inner { max-width: 900px; margin: 0 auto; }
-  .pilares h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 48px;
-    letter-spacing: -0.02em;
-  }
-  .pilares-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 20px;
-  }
-  @media (max-width: 600px) { .pilares-grid { grid-template-columns: 1fr; } }
-
-  .pilar-card {
-    background: var(--cinza-800);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 28px;
-  }
-  .pilar-num {
-    font-family: 'Sora', sans-serif;
-    font-size: 13px;
-    font-weight: 700;
-    color: var(--verde);
-    margin-bottom: 12px;
-    letter-spacing: 0.06em;
-  }
-  .pilar-title {
-    font-family: 'Sora', sans-serif;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 10px;
-  }
-  .pilar-desc { font-size: 15px; color: #9ca3af; line-height: 1.6; }
-
-  .features {
-    padding: 80px 24px;
-    max-width: 900px;
-    margin: 0 auto;
-  }
-  .features h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(24px, 3.5vw, 36px);
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 8px;
-    letter-spacing: -0.02em;
-  }
-  .features-sub {
-    text-align: center;
-    color: var(--cinza-500);
-    font-size: 16px;
-    margin-bottom: 48px;
-  }
-  .features-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 20px;
-  }
-  @media (max-width: 700px) { .features-grid { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 460px) { .features-grid { grid-template-columns: 1fr; } }
-
-  .feature-card {
-    background: var(--cinza-100);
-    border-radius: 14px;
-    padding: 22px;
-  }
-  .feature-icon { font-size: 28px; margin-bottom: 12px; }
-  .feature-title { font-family: 'Sora', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 8px; }
-  .feature-desc { font-size: 14px; color: var(--cinza-500); line-height: 1.6; }
-
-  .importacao-section {
-    background: var(--cinza-900);
-    color: var(--branco);
-    padding: 80px 24px;
-  }
-  .importacao-section .section-label { color: var(--verde); }
-  .importacao-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    margin-bottom: 16px;
-    letter-spacing: -0.02em;
-  }
-  .importacao-grid {
-    max-width: 900px; margin: 0 auto;
-    display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
-  }
-  .importacao-card {
-    background: var(--cinza-800);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px;
-    padding: 28px;
-  }
-  .importacao-icon { font-size: 32px; margin-bottom: 14px; }
-  .importacao-card h3 { font-family: 'Sora', sans-serif; font-size: 19px; font-weight: 700; margin-bottom: 10px; color: var(--branco); }
-  .importacao-card p { font-size: 15px; color: #9ca3af; line-height: 1.6; }
-  .importacao-note { max-width: 700px; margin: 28px auto 0; text-align: center; font-size: 15px; color: #9ca3af; font-weight: 600; }
-  @media (max-width: 600px) { .importacao-grid { grid-template-columns: 1fr; } }
-
-  .depoimentos-section { background: var(--cinza-100); padding: 80px 24px; }
-  .depoimentos-section .section-label { color: var(--verde-escuro); }
-  .depoimentos-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    margin-bottom: 40px;
-    letter-spacing: -0.02em;
-  }
-  .depoimento-grid {
-    max-width: 980px; margin: 0 auto;
-    display: grid; grid-template-columns: repeat(3,1fr); gap: 18px;
-  }
-  .depoimento-card {
-    background: var(--branco);
-    border: 1px solid #e5e7eb;
-    border-radius: 16px;
-    padding: 20px;
-    display: flex; flex-direction: column; gap: 10px;
-    box-shadow: 0 10px 24px -16px rgba(0,0,0,0.15);
-  }
-  .depoimento-fonte { font-size: 11px; font-weight: 800; color: var(--verde-escuro); text-transform: uppercase; letter-spacing: 0.06em; }
-  .depoimento-card p { font-size: 14.5px; color: var(--cinza-900); line-height: 1.5; }
-  .depoimento-card.depoimento-image { padding: 0; }
-  .depoimento-card.depoimento-image img { width: 100%; height: auto; display: block; }
-  @media (max-width: 700px) { .depoimento-grid { grid-template-columns: 1fr; } }
-
-  .preco-section {
-    background: var(--cinza-100);
-    padding: 80px 24px;
-  }
-  .preco-inner { max-width: 720px; margin: 0 auto; }
-  .preco-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(24px, 3.5vw, 36px);
-    font-weight: 800;
-    text-align: center;
-    margin-bottom: 12px;
-    letter-spacing: -0.02em;
-  }
-  .preco-compare-text {
-    max-width: 600px; margin: 16px auto 0;
-    text-align: center; font-size: 16px; color: #4b5563; line-height: 1.6;
-  }
-  .preco-comparacao {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 40px;
-    margin-top: 32px;
-  }
-  @media (max-width: 560px) { .preco-comparacao { grid-template-columns: 1fr; } }
-
-  .comp-card {
-    border-radius: 12px;
-    padding: 18px;
-    text-align: center;
-  }
-  .comp-card.ruim { background: #fef2f2; border: 2px solid #fecaca; }
-  .comp-card.neutro { background: #fffbeb; border: 2px solid #fde68a; }
-  .comp-card.bom { background: var(--verde-claro); border: 2px solid rgba(29,184,126,0.4); }
-  .comp-label { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
-  .comp-card.ruim .comp-label { color: #dc2626; }
-  .comp-card.neutro .comp-label { color: #d97706; }
-  .comp-card.bom .comp-label { color: var(--verde-escuro); }
-  .comp-price { font-family: 'Sora', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 6px; }
-  .comp-desc { font-size: 13px; color: var(--cinza-500); line-height: 1.4; }
-
-  .plans-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
-    max-width: 700px;
-    margin: 36px auto 0;
-    align-items: stretch;
-  }
-  .plan-card {
-    position: relative;
-    background: var(--cinza-900);
-    color: var(--branco);
-    border-radius: 20px;
-    padding: 32px 26px;
-    border: 2px solid rgba(29,184,126,0.15);
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-  }
-  .plan-card.featured {
-    border-color: var(--verde);
-    transform: scale(1.05);
-    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.6);
-    background: linear-gradient(180deg, var(--cinza-900) 0%, #0a2a1e 100%);
-  }
-  .plan-badge {
-    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
-    background: var(--verde); color: #fff; font-size: 12px; font-weight: 800;
-    padding: 7px 16px; border-radius: 100px; white-space: nowrap;
-    box-shadow: 0 8px 16px -6px rgba(29,184,126,0.5);
-  }
-  @media (max-width: 600px) {
-    .plan-card.featured { transform: none; }
-  }
-  .plan-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.06em; color: #9ca3af; margin-bottom: 10px; }
-  .plan-price { font-family: 'Sora', sans-serif; font-weight: 900; color: var(--verde); line-height: 1; font-size: 42px; }
-  .plan-price .cur { font-size: 18px; vertical-align: top; position: relative; top: 4px; }
-  .plan-price .per { font-size: 14px; font-weight: 700; color: #9ca3af; }
-  .plan-sub { margin-top: 8px; font-size: 12px; color: #9ca3af; font-weight: 600; }
-  .plan-save { margin-top: 10px; font-size: 12px; font-weight: 700; color: var(--verde); background: rgba(29,184,126,0.12); padding: 6px 10px; border-radius: 8px; }
-  .plan-checks { margin: 18px 0 6px; text-align: left; width: 100%; display: flex; flex-direction: column; gap: 8px; border-top: 1px solid rgba(255,255,255,0.08); padding-top: 16px; }
-  .plan-checks div { font-size: 12.5px; color: #e5e7eb; font-weight: 500; }
-  .plan-checks div span { color: var(--verde); font-weight: 800; margin-right: 4px; }
-  .plan-card .btn-primary, .plan-card .btn-outline-v { margin-top: 14px; width: 100%; justify-content: center; }
-
-  .guarantee-focus {
-    margin: 32px auto 0; max-width: 600px;
-    background: var(--cinza-900); color: var(--branco);
-    border: 1px solid rgba(29,184,126,0.25);
-    border-radius: 20px; padding: 26px 30px;
-    display: flex; align-items: center; gap: 22px; text-align: left;
-  }
-  .gf-number {
-    flex: none; width: 70px; height: 70px; border-radius: 50%;
-    background: var(--verde); color: #fff;
-    font-family: 'Sora', sans-serif; font-size: 32px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-  }
-  .gf-title { font-family: 'Sora', sans-serif; font-size: 18px; font-weight: 800; color: var(--branco); }
-  .gf-stars { margin-top: 2px; font-size: 13px; }
-  .gf-text p { margin-top: 8px; font-size: 14px; color: #9ca3af; }
-
-  .faq-section { background: var(--branco); padding: 80px 24px; }
-  .faq-section h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 40px);
-    font-weight: 800;
-    margin-bottom: 40px;
-    letter-spacing: -0.02em;
-  }
-  .faq-list { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 12px; }
-  .faq-item { background: var(--cinza-100); border: 1px solid #e5e7eb; border-radius: 12px; padding: 18px 22px; }
-  .faq-item summary {
-    cursor: pointer; font-weight: 700; font-size: 15.5px; color: var(--cinza-900);
-    list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 12px;
-  }
-  .faq-item summary::-webkit-details-marker { display: none; }
-  .faq-item summary::after { content: '+'; font-size: 20px; color: var(--verde-escuro); font-weight: 400; flex: none; }
-  .faq-item[open] summary::after { content: '\2212'; }
-  .faq-item p { margin-top: 12px; font-size: 14.5px; color: #4b5563; line-height: 1.6; }
-
-  .cta-final {
-    background: var(--verde);
-    padding: 80px 24px;
-    text-align: center;
-  }
-  .cta-final h2 {
-    font-family: 'Sora', sans-serif;
-    font-size: clamp(26px, 4vw, 42px);
-    font-weight: 800;
-    color: var(--branco);
-    margin-bottom: 12px;
-    letter-spacing: -0.02em;
-    line-height: 1.2;
-  }
-  .cta-final p {
-    color: rgba(255,255,255,0.8);
-    font-size: 17px;
-    margin-bottom: 32px;
-  }
-  .btn-final {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--branco);
-    color: var(--verde-escuro);
-    font-family: 'Sora', sans-serif;
-    font-size: 18px;
-    font-weight: 800;
-    padding: 20px 40px;
-    border-radius: 12px;
-    text-decoration: none;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    transition: transform 0.15s;
-  }
-  .btn-final:hover { transform: translateY(-2px); }
-  .cta-final-trust {
-    margin-top: 20px;
-    color: rgba(255,255,255,0.7);
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    flex-wrap: wrap;
-  }
-
-  footer {
-    background: var(--cinza-900);
-    color: #6b7280;
-    text-align: center;
-    padding: 32px 24px;
-    font-size: 13px;
-  }
-  footer a { color: #6b7280; text-decoration: underline; }
-  footer a:hover { color: var(--verde); }
-
-  .text-center { text-align: center; }
-  .mt-4 { margin-top: 16px; }
-  .mb-0 { margin-bottom: 0; }
-
-  .social-proof{
-    position:fixed;bottom:20px;left:20px;right:auto;
-    background:var(--branco);border-radius:14px;
-    box-shadow:0 16px 40px -12px rgba(0,0,0,0.35);
-    padding:14px 16px;display:flex;align-items:center;gap:12px;
-    max-width:300px;
-    border:1px solid var(--cinza-100);
-    transform:translateY(24px);opacity:0;pointer-events:none;
-    transition:transform .4s ease, opacity .4s ease;
-    z-index:900;
-  }
-  .social-proof.show{transform:translateY(0);opacity:1;}
-  .social-proof .avatar{
-    flex:none;width:38px;height:38px;border-radius:50%;
-    background:var(--verde-claro);color:var(--verde-escuro);
-    display:flex;align-items:center;justify-content:center;
-    font-weight:800;font-size:13px;
-  }
-  .social-proof .sp-text{font-size:13px;color:var(--cinza-900);line-height:1.4;}
-  .social-proof .sp-name{font-weight:700;}
-  .social-proof .sp-time{font-size:11px;color:var(--cinza-500);margin-top:2px;}
-  .social-proof .sp-close{
-    margin-left:auto;flex:none;background:none;border:none;
-    color:var(--cinza-500);font-size:16px;cursor:pointer;padding:0 0 0 6px;line-height:1;
-  }
-
-  @media (max-width:600px){
-    .topbar{font-size:12px;padding:10px 12px;}
-    .social-proof{left:12px;bottom:12px;max-width:260px;padding:12px 14px;}
-    .guarantee-focus{flex-direction:column;text-align:center;}
-    .plans-grid{grid-template-columns:1fr;max-width:320px;}
-  }
-</style>
+<link rel="stylesheet" href="../assets/css/escola.css">
+<link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
-<body>
+<body data-curso="Dashboard Financeiro">
 
-<div class="topbar">
-  🔥 Oferta de lançamento ativa por tempo indeterminado, garanta o valor promocional antes que ele suba
-</div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="chk" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="#8670FF"/><path d="M7 12.5l3.2 3.2L17 9" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="v" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+</svg>
 
-<section class="hero">
-  <div class="hero-eyebrow">✦ Dashboard Financeiro</div>
-  <h1>Chega de Excel.<br>Entenda suas finanças<br>em <em>menos de 10 segundos.</em></h1>
-  <p class="hero-sub">Sem planilhas, sem fórmulas. Um painel visual que responde tudo antes de você terminar de pensar a pergunta.</p>
-  <p class="hero-price-line">Por menos de R$8 por mês.</p>
-  <div class="hero-cta-wrap">
-    <a href="#preco" class="btn-primary">→ Quero meu Dashboard agora</a>
-    <div class="hero-trust">
-      <span>🔒 Pagamento seguro</span>
-      <span>✅ Cancele quando quiser</span>
-      <span>🛡️ 7 dias de garantia</span>
+<div class="aviso">🔥 Oferta de lançamento ativa por tempo indeterminado. Garanta o valor promocional antes que ele suba.</div>
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a href="#topo" class="dlogo" aria-label="Dashboard Financeiro, topo da página"><i>$</i>Dashboard Financeiro</a>
+    <div class="links">
+      <a href="#como-funciona">Como funciona</a>
+      <a href="#recursos">Recursos</a>
+      <a href="#depoimentos">Depoimentos</a>
+      <a href="#faq">Dúvidas</a>
+    </div>
+    <a class="btn" href="#comprar">Quero o Dashboard</a>
+  </div>
+</nav>
+
+<!-- Abertura -->
+<header class="hero" id="topo">
+  <div class="wrap">
+    <h1 id="h1" style="margin-top:0"><span class="tit-pre">Chega de Excel.</span>Entenda suas finanças <span class="grad">em menos de 10 segundos.</span></h1>
+    <p class="sub rv">Sem planilhas e sem fórmulas. Um painel visual que responde tudo antes de você terminar de pensar a pergunta, <strong>por menos de R$8 por mês.</strong></p>
+    <div class="ctas rv">
+      <a class="btn" href="#comprar">Quero meu Dashboard agora <span class="arr">→</span></a>
+    </div>
+    <div class="trust rv"><span>🔒 Pagamento seguro</span><span>✅ Acesso imediato</span><span>🛡️ 7 dias de garantia</span></div>
+    <div class="stage-hero" id="palco">
+      <div class="halo"></div>
+      <div class="voa v1"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 15h2"/></svg></span><span><small>Saldo em conta agora</small><b data-conta="6336.48">R$ 0,00</b></span></div>
+      <div class="voa v2"><span class="ic ok"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span><span><small>Fatura importada</small><b>32 lançamentos</b></span></div>
+      <div class="voa v3"><span class="ic mic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></span><span><small>Lançamento por voz <span class="ondas"><i></i><i></i><i></i><i></i></span></small>“Gastei 45 no mercado”</span></div>
+      <div class="voa v4"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></span><span><small>Meta do mês</small><b>100% batida</b><div class="meta"><i></i></div></span></div>
+      <img class="mac" src="../assets/img/dashboard/hero.webp" alt="Dashboard Financeiro aberto num MacBook: saldo em conta, receitas, despesas, lucro e gráfico de 12 meses" width="1800" height="1074">
     </div>
   </div>
-</section>
+</header>
 
-<section class="mockup-section">
-  <div class="mockup-card">
-    <div class="mock-header">
-      <div class="mock-dots">
-        <div class="mock-dot"></div>
-        <div class="mock-dot"></div>
-        <div class="mock-dot"></div>
-      </div>
-      <div class="mock-title">Dashboard Financeiro — Julho 2025</div>
-      <div style="width:60px"></div>
+<!-- Em segundos -->
+<section id="como-funciona" data-blur="l">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Clareza imediata</span>
+      <h2>Imagina abrir o celular e saber, <span class="grad">em segundos, exatamente:</span></h2>
+      <p>Sem fazer contas. Sem procurar em várias abas. Sem medo de esquecer um lançamento.</p>
     </div>
-    <div class="mock-cards">
-      <div class="mock-stat">
-        <div class="mock-stat-label">Saldo atual</div>
-        <div class="mock-stat-value verde">R$4.820</div>
-        <div class="mock-stat-delta">↑ 12% vs mês anterior</div>
-      </div>
-      <div class="mock-stat">
-        <div class="mock-stat-label">Receitas</div>
-        <div class="mock-stat-value">R$7.300</div>
-        <div class="mock-stat-delta">↑ R$500 vs julho</div>
-      </div>
-      <div class="mock-stat">
-        <div class="mock-stat-label">Despesas</div>
-        <div class="mock-stat-value vermelho">R$2.480</div>
-        <div class="mock-stat-delta" style="color:#ef4444">↑ 8% vs mês anterior</div>
-      </div>
-      <div class="mock-stat">
-        <div class="mock-stat-label">Meta poupança</div>
-        <div class="mock-stat-value" style="font-size:16px">68% <span style="font-size:12px;color:#9ca3af">/ R$2.000</span></div>
-        <div class="mock-stat-delta">Faltam R$640</div>
-      </div>
-    </div>
-    <div class="mock-chart">
-      <div class="mock-chart-title">RECEITAS × DESPESAS — 12 MESES</div>
-      <div class="mock-bars">
-        <div class="mock-bar-group"><div class="mock-bar" style="height:55px;background:#1DB87E"></div><div class="mock-bar" style="height:32px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:62px;background:#1DB87E"></div><div class="mock-bar" style="height:38px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:48px;background:#1DB87E"></div><div class="mock-bar" style="height:40px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:70px;background:#1DB87E"></div><div class="mock-bar" style="height:35px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:58px;background:#1DB87E"></div><div class="mock-bar" style="height:42px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:65px;background:#1DB87E"></div><div class="mock-bar" style="height:30px;background:#ef4444"></div></div>
-        <div class="mock-bar-group"><div class="mock-bar" style="height:73px;background:#1DB87E"></div><div class="mock-bar" style="height:36px;background:#ef4444"></div></div>
-      </div>
-    </div>
-    <div class="mock-cats">
-      <div class="mock-cat-item"><div class="mock-cat-dot" style="background:#6366f1"></div><div class="mock-cat-name">Alimentação</div><div class="mock-cat-bar-wrap"><div class="mock-cat-bar" style="width:75%;background:#6366f1"></div></div><div class="mock-cat-val">R$742</div></div>
-      <div class="mock-cat-item"><div class="mock-cat-dot" style="background:#f59e0b"></div><div class="mock-cat-name">Transporte</div><div class="mock-cat-bar-wrap"><div class="mock-cat-bar" style="width:40%;background:#f59e0b"></div></div><div class="mock-cat-val">R$380</div></div>
-      <div class="mock-cat-item"><div class="mock-cat-dot" style="background:#ec4899"></div><div class="mock-cat-name">Lazer</div><div class="mock-cat-bar-wrap"><div class="mock-cat-bar" style="width:30%;background:#ec4899"></div></div><div class="mock-cat-val">R$290</div></div>
-      <div class="mock-cat-item"><div class="mock-cat-dot" style="background:#14b8a6"></div><div class="mock-cat-name">Saúde</div><div class="mock-cat-bar-wrap"><div class="mock-cat-bar" style="width:20%;background:#14b8a6"></div></div><div class="mock-cat-val">R$195</div></div>
-    </div>
-  </div>
-</section>
-
-<section class="checks-section">
-  <div class="section-label">Clareza imediata</div>
-  <h2>Imagina abrir o celular e saber, em segundos, exatamente:</h2>
-  <p class="checks-intro">Sem fazer contas. Sem procurar em várias abas. Sem medo de esquecer um lançamento.</p>
-  <div class="checks-grid">
-    <div class="check-item">
-      <div class="check-icon">✓</div>
-      <div class="check-text">Quanto você tem em caixa agora mesmo</div>
-    </div>
-    <div class="check-item">
-      <div class="check-icon">✓</div>
-      <div class="check-text">Quanto já gastou e quanto ainda pode gastar</div>
-    </div>
-    <div class="check-item">
-      <div class="check-icon">✓</div>
-      <div class="check-text">Quais categorias mais consomem seu dinheiro</div>
-    </div>
-    <div class="check-item">
-      <div class="check-icon">✓</div>
-      <div class="check-text">Se você vai fechar o mês no positivo ou no vermelho</div>
-    </div>
-  </div>
-  <div class="checks-closing">
-    É como ter um contador pessoal que atualiza o relatório toda vez que você lança um gasto. Quando a ferramenta faz o trabalho pesado, <strong>controlar suas finanças deixa de ser um projeto que você começa e abandona</strong> — e vira um hábito de 30 segundos por dia.
-  </div>
-</section>
-
-<section class="culpa-section">
-  <div class="culpa-inner">
-    <div class="section-label">A verdade que ninguém fala</div>
-    <h2>Você não abandonou suas finanças.<br>Suas finanças foram construídas pra te derrotar.</h2>
-    <p>Você provavelmente já tentou se organizar mais de uma vez. Baixou uma planilha, prometeu que "agora vai". Funcionou por uns dias — até a primeira fórmula quebrar, a semana corrida aparecer, ou o gasto ficar pra depois. E o "depois" nunca chegou.</p>
-    <p>Fórmula que quebra. Aba que some. Gráfico que você precisaria de manual pra entender. Isso não é organização — é trabalho. E você já tem trabalho demais.</p>
-    <div class="culpa-destaque">
-      Não foi falta de disciplina. Foi <em>ferramenta errada</em>. O Dashboard Financeiro nasceu pra fazer esse trabalho por você — pra que controlar o dinheiro seja simples o suficiente pra virar hábito.
-    </div>
-  </div>
-</section>
-
-<section class="antes-depois">
-  <h2>Antes e depois do Dashboard</h2>
-  <div class="ad-grid">
-    <div class="ad-card antes">
-      <div class="ad-card-header">✗ &nbsp;Antes — Excel</div>
-      <div class="ad-card-body">
-        <div class="excel-toolbar">Pasta1.xlsx — Microsoft Excel</div>
-        <table class="excel-table">
-          <tr><th>A</th><th>B</th><th>C</th><th>D</th></tr>
-          <tr><td>Salário</td><td>3.200</td><td></td><td class="excel-error">#REF!</td></tr>
-          <tr><td>Aluguel</td><td>-1.200</td><td></td><td></td></tr>
-          <tr><td>?????</td><td>-89,90</td><td></td><td></td></tr>
-          <tr><td>Total</td><td class="excel-formula">=SOMA(B1:B3</td><td></td><td></td></tr>
-          <tr><td colspan="4" style="color:#888;font-size:11px;padding:6px">▼ Aba2 &nbsp;▼ Gastos &nbsp;▼ [+]</td></tr>
-        </table>
-        <div class="excel-warning">
-          ⚠️ <span>Fórmula quebrada, aba escondida, impossível no celular. Você não consegue manter o hábito — e não é culpa sua.</span>
+    <div class="seg">
+      <ol class="perg rv" id="perg">
+        <li data-i="0"><span class="n">1</span><div><b>Quanto você tem em caixa agora mesmo</b><span>Sem precisar somar nada.</span></div></li>
+        <li data-i="1"><span class="n">2</span><div><b>Quanto já gastou e quanto ainda pode gastar</b><span>Sem fazer conta de cabeça.</span></div></li>
+        <li data-i="2"><span class="n">3</span><div><b>Quais categorias mais consomem seu dinheiro</b><span>Sem esperar o fim do mês para descobrir.</span></div></li>
+        <li data-i="3"><span class="n">4</span><div><b>Se vai fechar o mês no positivo ou no vermelho</b><span>Antes de a surpresa acontecer.</span></div></li>
+      </ol>
+      <div class="painel rv" id="painel">
+        <span class="cronometro" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="13" r="8"/><path d="M10 2h4"/><path class="pt" d="M12 13V8.5"/></svg><span id="seg">0</span>s</span>
+        <div class="topo"><span class="dlogo"><i>$</i>Meu Dashboard</span><span class="mes">Outubro · 2026</span></div>
+        <div class="tiles" id="tiles">
+          <div class="tile saldo"><div class="k">Em caixa agora</div><div class="v" data-conta="6336.48">R$ 0,00</div><div class="d">Saldo em conta</div></div>
+          <div class="tile"><div class="k">Gasto no mês</div><div class="v" data-conta="705">R$ 0,00</div><div class="d">Ainda pode gastar R$ 1.295,00</div></div>
+          <div class="tile"><div class="k">Onde mais gasta</div><div class="rosca"><span class="dn"></span><ul><li style="--c:var(--accent)">Casa</li><li style="--c:var(--pop)">Mercado</li><li style="--c:var(--laranja)">Lazer</li></ul></div></div>
+          <div class="tile"><div class="k">Fechamento do mês</div><div class="v" style="color:var(--verde)">+R$ 1.240</div><div class="d"><span class="selo-pago">No positivo</span></div></div>
         </div>
       </div>
     </div>
+    <p class="destaque-txt rv">É como ter um contador pessoal que atualiza o relatório toda vez que você lança um gasto. Quando a ferramenta faz o trabalho pesado, controlar as finanças deixa de ser um projeto que você começa e abandona <b>e vira um hábito de 30 segundos por dia.</b></p>
+    <div class="ctas rv" style="margin-top:44px"><a class="btn" href="#comprar">Quero essa clareza <span class="arr">→</span></a></div>
+  </div>
+</section>
 
-    <div class="ad-card depois">
-      <div class="ad-card-header">✓ &nbsp;Depois — Dashboard Financeiro</div>
-      <div class="ad-card-body">
-        <div class="fake-dash">
-          <div class="dash-topbar">
-            <div class="dash-title">💰 Julho 2025</div>
-            <div class="dash-month">Atualizado agora</div>
-          </div>
-          <div class="mini-cards">
-            <div class="mini-card">
-              <div class="mini-card-label">Saldo</div>
-              <div class="mini-card-val verde">R$4.820</div>
-            </div>
-            <div class="mini-card">
-              <div class="mini-card-label">Gastos do mês</div>
-              <div class="mini-card-val red">R$2.480</div>
-            </div>
-          </div>
-          <div class="mini-progress">
-            <div class="mini-progress-label"><span>Meta poupança</span><span>68%</span></div>
-            <div class="mini-progress-bar"><div class="mini-progress-fill" style="width:68%"></div></div>
-          </div>
-          <div style="margin-top:12px">
-            <div class="dash-cat-row"><div class="dash-cat-dot" style="background:#6366f1"></div><div class="dash-cat-name">Alimentação</div><div class="dash-cat-bar-wrap"><div class="dash-cat-bar-fill" style="width:75%;background:#6366f1"></div></div><div class="dash-cat-val">R$742</div></div>
-            <div class="dash-cat-row"><div class="dash-cat-dot" style="background:#f59e0b"></div><div class="dash-cat-name">Transporte</div><div class="dash-cat-bar-wrap"><div class="dash-cat-bar-fill" style="width:40%;background:#f59e0b"></div></div><div class="dash-cat-val">R$380</div></div>
-            <div class="dash-cat-row"><div class="dash-cat-dot" style="background:#ec4899"></div><div class="dash-cat-name">Lazer</div><div class="dash-cat-bar-wrap"><div class="dash-cat-bar-fill" style="width:28%;background:#ec4899"></div></div><div class="dash-cat-val">R$290</div></div>
-          </div>
-          <div class="dash-note">✓ Tudo salvo na nuvem · funciona no celular e no computador</div>
+<!-- Por que existe: antes e depois -->
+<section id="antes-depois" data-blur="r">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">A verdade que ninguém fala</span>
+      <h2>Você não abandonou suas finanças. <span class="grad">Suas finanças foram construídas pra te derrotar.</span></h2>
+      <p>Baixou uma planilha, prometeu que “agora vai”. Funcionou por uns dias, até a primeira fórmula quebrar, a semana corrida aparecer ou o gasto ficar para depois. E o “depois” nunca chegou.</p>
+    </div>
+    <div class="ba2">
+      <div class="lado sem rv">
+        <span class="pill">✕ Antes: planilha e caderno</span>
+        <div class="excel">
+          <table>
+            <tr><td></td><td>A</td><td>B</td><td>C</td></tr>
+            <tr><td>1</td><td>Salário</td><td>3200</td><td class="err">#REF!</td></tr>
+            <tr><td>2</td><td>Aluguel</td><td class="neg">-1200</td><td></td></tr>
+            <tr><td>3</td><td>?????</td><td class="neg">-89,90</td><td></td></tr>
+            <tr><td>4</td><td>Pix pro João??</td><td class="neg">-150</td><td></td></tr>
+            <tr><td>5</td><td>Total</td><td class="cur">=SOMA(B1:B</td><td></td></tr>
+          </table>
+        </div>
+        <div class="papel" aria-hidden="true">luz: <s>paguei?</s><br>mercado 230<br>ifood ???</div>
+        <p>Fórmula quebrada, aba escondida, gasto anotado no papel. <b>Difícil de usar no celular e impossível de manter.</b></p>
+      </div>
+      <div class="lado com rv">
+        <span class="pill">✓ Depois: Dashboard Financeiro</span>
+        <img src="../assets/img/dashboard/offer-dashboard.webp" alt="Dashboard Financeiro organizado com saldo, receitas, despesas e gráficos" loading="lazy" width="1300" height="932">
+        <p>Tudo pronto para usar, salvo na nuvem, com gráficos automáticos. <b>Você entende o mês em segundos, sem fórmula nenhuma.</b></p>
+      </div>
+    </div>
+    <div class="frase rv">
+      <p class="a">Não foi falta de disciplina. <span class="grad">Foi ferramenta errada.</span></p>
+      <p class="b">O Dashboard Financeiro nasceu para fazer esse trabalho por você, para que controlar o dinheiro seja simples o suficiente para virar hábito.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Pilares -->
+<section id="pilares" data-blur="r">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Os 4 pilares do Dashboard</span>
+      <h2>O que muda <span class="grad">no seu dia a dia.</span></h2>
+    </div>
+    <div class="steps4">
+      <div class="step rv"><span class="n">01</span><div class="big num">1</div><h3>Clareza imediata</h3><p>Ao abrir, você já vê saldo, receitas, despesas, lucro, metas e gráficos numa única tela.</p></div>
+      <div class="step rv"><span class="n">02</span><div class="big num">2</div><h3>Organização sem esforço</h3><p>Lançamentos escritos ou por voz, importação de faturas e categorias organizadas sozinhas.</p></div>
+      <div class="step rv"><span class="n">03</span><div class="big num">3</div><h3>Presente e futuro</h3><p>Lançamentos futuros, parcelas, metas e histórico para planejar antes da surpresa.</p></div>
+      <div class="step rv"><span class="n">04</span><div class="big num">4</div><h3>Em qualquer lugar</h3><p>Funciona no navegador e salva tudo na nuvem. A organização acompanha a sua rotina.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Recursos -->
+<section id="recursos" data-blur="l">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Por que é diferente</span>
+      <h2>Cada função existe para <span class="grad">eliminar um atrito.</span></h2>
+      <p>Enquanto planilhas quebram e apps cobram caro, o Dashboard faz o trabalho por você.</p>
+    </div>
+    <div class="fgrid">
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div><h3>Importação segura</h3><p>Você importa o extrato ou a fatura em poucos cliques, e seus dados ficam sob o seu controle.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M18 14.5a6.5 6.5 0 0 1 3.5 5.5"/></svg></div><h3>Múltiplos perfis</h3><p>Vida pessoal e negócio separados, na mesma conta. Ideal para autônomos e MEIs.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg></div><h3>Gráficos que ajudam a decidir</h3><p>Despesas por categoria e receita x despesa mês a mês, sem montar um gráfico sequer.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg></div><h3>Metas que acompanham você</h3><p>Defina metas e veja quanto já avançou. Decisão baseada em dado, não em achismo.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></div><h3>Relatórios em PDF</h3><p>Relatório mensal ou anual pronto em segundos, sem montar documento na mão.</p></div>
+      <div class="fcard rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></div><h3>Lançamento escrito ou por voz</h3><p>Fale ou escreva do seu jeito e o Dashboard entende e organiza o lançamento.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- Importação -->
+<section id="importacao" data-blur="r">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Importação em massa</span>
+      <h2>Chega de lançar <span class="grad">gasto por gasto.</span></h2>
+      <p>Importe o extrato ou a fatura e só revise. Em menos de 1 minuto, o mês inteiro está organizado.</p>
+    </div>
+    <div class="imp">
+      <div class="cards">
+        <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M9.5 10v8M14.5 10v8M19 10v8M3 20h18"/></svg></div><div><h3>Extrato bancário</h3><p>Suba o extrato e o Dashboard organiza tudo por categoria. Você só confere e confirma.</p></div></div>
+        <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="5" width="19" height="14" rx="2.5"/><path d="M2.5 10h19M6.5 15h4"/></svg></div><div><h3>Fatura do cartão</h3><p>A fatura fechou? Importe e cada compra é categorizada, parcelas incluídas.</p></div></div>
+        <div class="seg-banco rv"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2.5"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Você mesma importa o arquivo. Nunca pedimos login, senha ou acesso ao seu banco.</div>
+      </div>
+      <div class="revisar rv" id="revisar">
+        <div class="tt"><b>Revisar lançamentos</b><small>fatura-outubro.pdf</small></div>
+        <div class="arq"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6d5be9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5"/></svg><span>Lendo a fatura</span><span class="barra"><i></i></span></div>
+        <div class="linhas">
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">05/10</span><span class="ds">PIX RECEBIDO · CLIENTE</span><span class="vl e">+1.200,00</span><span class="cat" style="--cb:#e7f8ee;--cc:#17683a">Entrada · Trabalho</span></div>
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">06/10</span><span class="ds">SUPERMERCADO BOM PREÇO</span><span class="vl s">−230,40</span><span class="cat" style="--cb:#efeaff;--cc:#4c3dbd">Mercado</span></div>
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">07/10</span><span class="ds">UBER *TRIP</span><span class="vl s">−24,90</span><span class="cat" style="--cb:#e6f0ff;--cc:#1f5fbf">Transporte</span></div>
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">08/10</span><span class="ds">STREAMING · ASSINATURA</span><span class="vl s">−39,90</span><span class="cat" style="--cb:#fff0e0;--cc:#a85d00">Assinaturas</span></div>
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">09/10</span><span class="ds">RESTAURANTE · DELIVERY</span><span class="vl s">−58,00</span><span class="cat" style="--cb:#ffe8f0;--cc:#b0245a">Alimentação</span></div>
+          <div class="linha"><span class="cx"><svg width="10" height="10" style="color:#fff"><use href="#v"/></svg></span><span class="dt">10/10</span><span class="ds">LOJA · PARCELA 2/6</span><span class="vl s">−89,90</span><span class="cat" style="--cb:#efeaff;--cc:#4c3dbd">Casa · 2/6</span></div>
+        </div>
+        <div class="pronto"><svg width="18" height="18" style="color:#fff"><use href="#v"/></svg>Mês organizado. É só confirmar.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Depoimentos -->
+<section id="depoimentos" data-blur="lr">
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Quem já usa</span>
+      <h2>O que estão dizendo <span class="grad">do Dashboard.</span></h2>
+    </div>
+    <div class="rgrid">
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-1.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="658"></div></article>
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-2.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="615"></div></article>
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-4.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="621"></div></article>
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-5.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="756"></div></article>
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-3.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="168"></div></article>
+      <article class="res rv"><div class="print"><img src="../assets/img/dashboard/depoimento-6.webp" alt="Depoimento de cliente sobre o Dashboard Financeiro" loading="lazy" width="800" height="498"></div></article>
+    </div>
+  </div>
+</section>
+
+<!-- Compra -->
+<section class="offer" id="comprar">
+  <div class="bgglow"></div>
+  <div class="wrap">
+    <div class="head rv">
+      <span class="eyebrow">Plano anual</span>
+      <h2>Comece hoje a enxergar <span class="grad">suas finanças com clareza.</span></h2>
+    </div>
+    <div class="compara">
+      <div class="cmp ruim rv"><div class="k">Apps concorrentes</div><div class="v">R$50/mês</div><p>Todo mês, para sempre, sem desconto nenhum.</p></div>
+      <div class="cmp ruim rv"><div class="k">Planilha “grátis”</div><div class="v">R$0</div><p>Mas quebra, some e você abandona. Todo ano.</p></div>
+      <div class="cmp bom rv"><div class="k">Dashboard Financeiro</div><div class="v">R$7,90/mês</div><p>No plano anual. Atualizações e suporte incluídos.</p></div>
+    </div>
+    <div class="obox rv">
+      <div class="left">
+        <p class="quote">Tudo o que está incluído:</p>
+        <ul class="inc">
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Dashboard completo, sempre atualizado</li>
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Importação de extratos e faturas</li>
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Múltiplos perfis (pessoal e negócio)</li>
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Gráficos, metas e relatórios em PDF</li>
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Funciona no computador e no celular</li>
+          <li><svg width="20" height="20"><use href="#chk"/></svg>Todas as funções novas do ano incluídas</li>
+        </ul>
+      </div>
+      <div class="price">
+        <span class="selo-desc">🔥 +70% de desconto</span>
+        <span class="lbl">Plano anual</span>
+        <p class="de">de <s>R$29,90/mês</s></p>
+        <p class="val"><small>R$</small>7,90<span class="mes">/mês</span></p>
+        <p class="unico">pagamento único de <b>R$76,35</b> por 12 meses de acesso</p>
+        <span class="eco">✓ Você economiza R$282,45 no ano</span>
+        <a class="btn" href="https://pay.kiwify.com.br/xdxSBKU">Quero meu Dashboard por R$7,90/mês</a>
+        <div class="secure"><span>🔒 Compra segura</span><span>Acesso imediato</span><span>7 dias de garantia</span></div>
+      </div>
+    </div>
+    <p class="mensal rv">Prefere pagar mês a mês? <a href="https://pay.kiwify.com.br/JTbi7bF">Ver plano mensal de R$29,90</a></p>
+    <p class="banco-line rv">🔒 Não conectamos ao seu banco. Você importa os extratos e seus dados ficam sob o seu controle.</p>
+  </div>
+</section>
+
+<!-- Garantia -->
+<section class="guarantee" id="garantia" data-blur="l">
+  <div class="wrap">
+    <div class="guar rv">
+      <div class="selo"><svg viewBox="0 0 240 240" role="img" aria-label="Garantia de 7 dias"><defs><path id="arco" d="M120,120 m-86,0 a86,86 0 1,1 172,0 a86,86 0 1,1 -172,0"/></defs><style>.fundo{fill:currentColor}.anel{fill:none;stroke:#fff;stroke-opacity:.35;stroke-width:1.5}.txt{fill:#fff;font-family:Euclid,"Helvetica Neue",Arial,sans-serif;font-weight:600}</style><circle class="fundo" cx="120" cy="120" r="116"/><circle class="anel" cx="120" cy="120" r="100"/><circle class="anel" cx="120" cy="120" r="70"/><g class="gira"><text class="txt" font-size="15" letter-spacing="3.2" textLength="530" lengthAdjust="spacing"><textPath href="#arco">GARANTIA INCONDICIONAL ✦ SEM RISCO ✦ </textPath></text></g><text class="txt" x="120" y="134" text-anchor="middle" font-size="64" font-weight="700" letter-spacing="-3">7</text><text class="txt" x="120" y="160" text-anchor="middle" font-size="17" letter-spacing="2">DIAS</text></svg></div>
+      <div>
+        <span class="eyebrow">Garantia</span>
+        <h2>Você tem 7 dias para testar <span class="grad">sem risco.</span></h2>
+        <p>Use o Dashboard, importe um extrato e veja o seu mês organizado. Se por qualquer motivo não for para você, é só pedir o reembolso em até 7 dias e devolvemos 100% do valor, sem burocracia.</p>
+        <div class="steps3">
+          <div><b>Assine</b>O acesso chega no seu e-mail logo após a compra.</div>
+          <div><b>Use de verdade</b>Lance seus gastos e importe uma fatura.</div>
+          <div><b>Decida em 7 dias</b>Não gostou? Reembolso de 100% do valor.</div>
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="pilares">
-  <div class="pilares-inner">
-    <div class="section-label text-center" style="color:var(--verde);margin-bottom:12px">Os 4 pilares</div>
-    <h2>O que muda no seu dia a dia</h2>
-    <div class="pilares-grid">
-      <div class="pilar-card">
-        <div class="pilar-num">01</div>
-        <div class="pilar-title">Clareza imediata</div>
-        <div class="pilar-desc">Ao abrir o Dashboard, você já vê saldo, receitas, despesas, lucro, metas e gráficos numa única tela. Sem interpretar planilha, sem cruzar informação.</div>
-      </div>
-      <div class="pilar-card">
-        <div class="pilar-num">02</div>
-        <div class="pilar-title">Organização sem esforço</div>
-        <div class="pilar-desc">Lançamentos por texto ou voz, importação de faturas, categorias automáticas. Menos tempo preenchendo, mais tempo usando o que você descobriu.</div>
-      </div>
-      <div class="pilar-card">
-        <div class="pilar-num">03</div>
-        <div class="pilar-title">Visão do presente e do futuro</div>
-        <div class="pilar-desc">Com parcelas, metas e histórico em tempo real, você antecipa problemas e planeja os próximos meses antes que a surpresa aconteça.</div>
-      </div>
-      <div class="pilar-card">
-        <div class="pilar-num">04</div>
-        <div class="pilar-title">Acesso em qualquer lugar</div>
-        <div class="pilar-desc">Funciona direto no navegador, salva tudo na nuvem. Recebeu um pix na rua? Lança na hora, sem esperar chegar em casa.</div>
-      </div>
+<!-- Dúvidas -->
+<section class="faq" id="faq" data-blur="r">
+  <div class="wrap">
+    <div class="top rv">
+      <h2><span class="grad">Perguntas</span> frequentes</h2>
+      <p>Ficou alguma dúvida?<br>Chama no WhatsApp.</p>
+    </div>
+    <div class="list">
+      <details class="rv"><summary>O Dashboard funciona para qualquer pessoa?</summary><p>Sim. Funciona para quem já tenta se organizar e quer parar de sofrer com planilha, e para quem nunca conseguiu manter nenhum controle. A interface é visual e não exige conhecimento técnico.</p></details>
+      <details class="rv"><summary>Não tenho nenhum conhecimento prévio. Consigo usar?</summary><p>Sim, o Dashboard foi feito para ser simples desde o primeiro acesso. Se quiser aprender ainda mais rápido, as aulas completas em vídeo estão disponíveis como adicional no checkout.</p></details>
+      <details class="rv"><summary>O Dashboard se conecta com a minha conta do banco?</summary><p>Não. Por segurança, nunca pedimos login, senha ou acesso à sua conta bancária. Você mesma importa o extrato ou a fatura, em poucos cliques.</p></details>
+      <details class="rv"><summary>Como funciona o plano anual?</summary><p>Você faz um pagamento único de R$76,35 e tem 12 meses de acesso ao Dashboard completo, com todas as funções novas do ano. Sai por menos de R$7,90 por mês, mais de 70% abaixo do plano mensal de R$29,90.</p></details>
+      <details class="rv"><summary>Existe plano mensal?</summary><p>Sim, por R$29,90 por mês, sem fidelidade e sem multa: você pode cancelar quando quiser. O acesso é o mesmo do plano anual.</p></details>
+      <details class="rv"><summary>Como recebo meu acesso?</summary><p>Assim que o pagamento é aprovado, você recebe o acesso por e-mail em poucos minutos, com o passo a passo para começar.</p></details>
+      <details class="rv"><summary>O pagamento é seguro?</summary><p>Sim. O pagamento é processado pela Kiwify, uma plataforma segura e criptografada. Seus dados de pagamento nunca passam por nós.</p></details>
+      <details class="rv"><summary>E se eu não gostar?</summary><p>Você tem 7 dias de garantia incondicional. Se não for para você, é só pedir o reembolso, sem burocracia.</p></details>
+    </div>
+    <div class="support rv">
+      <p>Ainda ficou com dúvida?</p>
+      <a href="https://wa.me/5541999401055" target="_blank" rel="noopener">Fale com o suporte no WhatsApp →</a>
     </div>
   </div>
 </section>
 
-<section class="features">
-  <div class="section-label text-center">Por que é diferente</div>
-  <h2>Cada função existe pra eliminar um atrito</h2>
-  <p class="features-sub">Enquanto apps cobram mensalidade cara e planilhas quebram, o Dashboard faz o trabalho por você.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">📥</div>
-      <div class="feature-title">Importação inteligente</div>
-      <div class="feature-desc">Importe extratos e faturas em poucos cliques. Sem digitar movimento por movimento.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">👤</div>
-      <div class="feature-title">Múltiplos perfis</div>
-      <div class="feature-desc">Vida pessoal e negócio separados na mesma conta. Ideal pra autônomos, MEIs e empreendedores.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <div class="feature-title">Gráficos automáticos</div>
-      <div class="feature-desc">Despesas por categoria, receita x despesa mês a mês — sem montar um gráfico sequer.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎯</div>
-      <div class="feature-title">Metas que evoluem</div>
-      <div class="feature-desc">Defina metas e veja o avanço em tempo real. Decisão baseada em dado, não em achismo.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📄</div>
-      <div class="feature-title">Relatórios em segundos</div>
-      <div class="feature-desc">Relatório mensal ou anual em PDF, gerado automaticamente. Sem montar documento na mão.</div>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📱</div>
-      <div class="feature-title">Vai com você</div>
-      <div class="feature-desc">A maioria dos gastos acontece fora de casa. Registre na hora, antes do "depois eu anoto" virar esquecimento.</div>
-    </div>
+<!-- Chamada final -->
+<section class="final-cta" data-blur="lr">
+  <div class="wrap">
+    <span class="eyebrow rv">Comece hoje</span>
+    <h2 class="rv">Comece a enxergar seu dinheiro com clareza <span class="grad">antes de mais um mês passar.</span></h2>
+    <p class="sub rv">Por menos de R$8 por mês no plano anual, com 7 dias de garantia.</p>
+    <div class="ctas rv"><a class="btn" href="#comprar">Quero organizar minhas finanças <span class="arr">→</span></a></div>
+    <div class="trust rv"><span>🔒 Compra segura</span><span>✅ Acesso imediato</span><span>🛡️ 7 dias de garantia</span><span>📱 Celular e computador</span></div>
   </div>
 </section>
 
-<section class="importacao-section">
-  <div class="section-label text-center">Importação em massa</div>
-  <h2 class="text-center">Chega de lançar gasto por gasto.</h2>
-  <div class="importacao-grid" style="margin-top:32px;">
-    <div class="importacao-card">
-      <div class="importacao-icon">🏦</div>
-      <h3>Importe seu extrato bancário</h3>
-      <p>Sobe o extrato do banco e o Dashboard organiza tudo automaticamente por categoria. Você só revisa e confirma, sem digitar linha por linha.</p>
+<!-- Rodapé -->
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div><span class="dlogo"><i>$</i>Dashboard Financeiro</span><p style="margin-top:12px;max-width:34ch">Um painel visual para entender sua vida financeira em segundos. Criado por Lari Tedeschi.</p></div>
+      <div><h4>Dashboard</h4><ul><li><a href="#comprar">Assinar</a></li><li><a href="https://docs.google.com/document/d/1nTM8njyugzgFsqLTX_Selr1AcGhyU-b_VIpJMPb0Lxg/view" target="_blank" rel="noopener">Termos de Uso e Privacidade</a></li><li><a href="https://wa.me/5541999401055" target="_blank" rel="noopener">Suporte no WhatsApp</a></li></ul></div>
+      <div><h4>Lari Tedeschi</h4><ul><li><a href="https://laritedeschi.com" target="_blank" rel="noopener">Cursos e produtos</a></li><li><a href="https://www.instagram.com/laritedeschi" target="_blank" rel="noopener">Instagram</a></li><li><a href="https://www.youtube.com/@laritedeschi" target="_blank" rel="noopener">YouTube</a></li></ul></div>
     </div>
-    <div class="importacao-card">
-      <div class="importacao-icon">💳</div>
-      <h3>Importe sua fatura do cartão</h3>
-      <p>A fatura fechou? É só importar. Cada compra é categorizada automaticamente, parcelas incluídas, sem lançar item por item no crédito.</p>
-    </div>
+    <p class="copy">© 2026 Dashboard Financeiro · Lari Tedeschi · Todos os direitos reservados</p>
   </div>
-  <p class="importacao-note">Importe automaticamente e só revise. Em menos de 1 minuto, seu mês inteiro está organizado.</p>
-</section>
-
-<section class="depoimentos-section">
-  <div class="section-label text-center">Depoimentos</div>
-  <h2 class="text-center">O que quem já usa o Dashboard Financeiro está dizendo</h2>
-  <div class="depoimento-grid">
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-1.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-2.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-3.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-4.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-5.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-    <div class="depoimento-card depoimento-image">
-      <img src="../depoimentos/depoimento-6.jpg" alt="Depoimento de cliente sobre o Dashboard Financeiro">
-    </div>
-  </div>
-</section>
-
-<section class="preco-section" id="preco">
-  <div class="preco-inner">
-    <div class="section-label text-center">Escolha seu plano</div>
-    <h2>Escolha como quer continuar no controle das suas finanças</h2>
-    <p class="preco-compare-text">Por menos de R$8 por mês, seu Dashboard nunca para de evoluir: toda atualização e função nova chega sem custo extra, com suporte sempre ativo. Não gostou? Cancele quando quiser, sem multa e sem burocracia.</p>
-
-    <div class="preco-comparacao">
-      <div class="comp-card ruim">
-        <div class="comp-label">Apps concorrentes</div>
-        <div class="comp-price">R$50/mês</div>
-        <div class="comp-desc">Todo mês, para sempre, sem desconto nenhum.</div>
-      </div>
-      <div class="comp-card neutro">
-        <div class="comp-label">Planilha "grátis"</div>
-        <div class="comp-price">R$0</div>
-        <div class="comp-desc">Mas quebra, some e você abandona em 11 dias. Todo ano.</div>
-      </div>
-      <div class="comp-card bom">
-        <div class="comp-label">Dashboard Financeiro</div>
-        <div class="comp-price">Menos de R$8/mês</div>
-        <div class="comp-desc">Menos que um café por semana. Atualizações e suporte pra sempre.</div>
-      </div>
-    </div>
-
-    <div class="plans-grid">
-      <div class="plan-card">
-        <div class="plan-name">Mensal</div>
-        <div class="plan-price"><span class="cur">R$</span>29<span class="cents">,90</span><span class="per">/mês</span></div>
-        <div class="plan-sub">cobrado todo mês · cancele quando quiser</div>
-        <div class="plan-checks">
-          <div><span>✓</span>Dashboard completo, sempre atualizado</div>
-          <div><span>✓</span>Importação de extratos e faturas</div>
-          <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
-          <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
-          <div><span>✓</span>Funciona no computador e no celular</div>
-        </div>
-        <a href="https://pay.kiwify.com.br/JTbi7bF" target="_blank" rel="noopener" class="btn-outline-v">Quero o plano mensal</a>
-      </div>
-
-      <div class="plan-card featured">
-        <div class="plan-badge">🔥 +70% de desconto</div>
-        <div class="plan-name">Anual</div>
-        <div class="plan-price"><span class="cur">R$</span>7<span class="cents">,90</span><span class="per">/mês</span></div>
-        <div class="plan-sub">Pagamento único de R$76,35 por 12 meses de acesso</div>
-        <div class="plan-save">economize R$282,45 por ano vs. o mensal</div>
-        <div class="plan-checks">
-          <div><span>✓</span>Dashboard completo, sempre atualizado</div>
-          <div><span>✓</span>Importação de extratos e faturas</div>
-          <div><span>✓</span>Múltiplos perfis (pessoal e negócio)</div>
-          <div><span>✓</span>Gráficos, metas e relatórios em PDF</div>
-          <div><span>✓</span>Funciona no computador e no celular</div>
-        </div>
-        <a href="https://pay.kiwify.com.br/xdxSBKU" target="_blank" rel="noopener" class="btn-primary">Quero o plano anual</a>
-      </div>
-    </div>
-
-    <div class="guarantee-focus">
-      <div class="gf-number">7</div>
-      <div class="gf-text">
-        <div class="gf-title">7 dias de garantia total</div>
-        <div class="gf-stars">⭐⭐⭐⭐⭐</div>
-        <p>Use o Dashboard por 7 dias. Se por qualquer motivo não for pra você, é só pedir e devolvemos 100% do valor, sem burocracia.</p>
-      </div>
-    </div>
-
-    <div style="margin-top:20px;color:#4b5563;font-size:13px;text-align:center;">🔒 Não conectamos ao seu banco. Você importa os extratos manualmente, e seus dados ficam seguros e sob seu controle</div>
-  </div>
-</section>
-
-<section class="faq-section">
-  <div class="section-label text-center">Dúvidas frequentes</div>
-  <h2 class="text-center">Perguntas frequentes</h2>
-  <div class="faq-list">
-    <details class="faq-item">
-      <summary>O Dashboard funciona para qualquer pessoa?</summary>
-      <p>Sim. Funciona pra quem já tenta se organizar e quer parar de sofrer com planilha, e também pra quem nunca conseguiu manter nenhum controle financeiro. A interface é visual e não exige nenhum conhecimento técnico.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Não tenho nenhum conhecimento prévio, consigo usar mesmo assim?</summary>
-      <p>Sim, o Dashboard foi feito pra ser simples desde o primeiro acesso.</p>
-    </details>
-    <details class="faq-item">
-      <summary>O Dashboard se conecta com a minha conta do banco?</summary>
-      <p>Não. Por segurança, nunca pedimos login, senha ou acesso à sua conta bancária. Você mesma importa o extrato ou a fatura, em poucos cliques, e mantém total controle sobre seus dados.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Qual a diferença entre o plano mensal e o anual?</summary>
-      <p>Os dois dão acesso ao mesmo Dashboard completo. No mensal você paga R$29,90 por mês e pode cancelar quando quiser. No anual, você paga uma vez por ano o equivalente a R$7,90/mês, com mais de 70% de desconto em relação ao mensal.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Posso cancelar quando quiser?</summary>
-      <p>Sim. Não existe fidelidade nem multa. Você pode cancelar sua assinatura a qualquer momento diretamente na plataforma de pagamento.</p>
-    </details>
-    <details class="faq-item">
-      <summary>Como recebo meu acesso?</summary>
-      <p>Assim que o pagamento é aprovado, você recebe o acesso por e-mail em poucos minutos, com o passo a passo pra começar a usar.</p>
-    </details>
-    <details class="faq-item">
-      <summary>O pagamento é seguro?</summary>
-      <p>Sim, o pagamento é processado por uma plataforma segura e criptografada. Seus dados de pagamento nunca passam por nós.</p>
-    </details>
-    <details class="faq-item">
-      <summary>E se eu não gostar?</summary>
-      <p>Você tem 7 dias de garantia incondicional. Se não for pra você, é só pedir o reembolso, sem burocracia.</p>
-    </details>
-  </div>
-</section>
-
-<section class="cta-final">
-  <h2>Comece a enxergar seu dinheiro com clareza — antes de mais um mês passar.</h2>
-  <p>Por menos de R$8 por mês. Cancele quando quiser.</p>
-  <a href="#preco" class="btn-final">→ Quero organizar minhas finanças</a>
-  <div class="cta-final-trust">
-    <span>✅ Cancele quando quiser</span>
-    <span>🛡️ 7 dias de garantia</span>
-    <span>🔒 Dados seguros e criptografados</span>
-    <span>📱 Funciona no celular e no computador</span>
-  </div>
-</section>
-
-<footer>
-  <p>© 2026 Dashboard Financeiro, Lari Tedeschi</p>
-  <p style="margin-top:8px"><a href="#">Termos de Uso e Privacidade</a> &nbsp;·&nbsp; <a href="#">Fale com o suporte</a></p>
 </footer>
 
-<div class="social-proof" id="social-proof">
-  <div class="avatar" id="sp-avatar">MG</div>
-  <div class="sp-text">
-    <span class="sp-name" id="sp-name">Mariana G.</span> acabou de adquirir o Dashboard Financeiro!
-    <div class="sp-time" id="sp-time">agora mesmo</div>
-  </div>
-  <button class="sp-close" id="sp-close" aria-label="Fechar">×</button>
-</div>
+<a class="wa" href="https://wa.me/5541999401055" target="_blank" rel="noopener" aria-label="Falar no WhatsApp">
+  <svg width="28" height="28" viewBox="0 0 20 20" fill="#fff"><path d="M17.085 2.91A9.9 9.9 0 0 0 10.04 0C4.553 0 .08 4.45.08 9.91c0 1.75.463 3.45 1.327 4.95L0 20l5.276-1.38a9.97 9.97 0 0 0 4.764 1.21C15.528 19.83 20 15.38 20 9.92c0-2.65-1.035-5.14-2.915-7.01zM10.04 18.15a8.3 8.3 0 0 1-4.221-1.15l-.301-.18-3.136.82.834-3.04-.201-.31a8.2 8.2 0 0 1-1.266-4.38c0-4.54 3.718-8.24 8.281-8.24 2.211 0 4.292.86 5.849 2.420a8.15 8.15 0 0 1 2.423 5.83c.02 4.54-3.699 8.23-8.262 8.23zm4.543-6.16c-.251-.12-1.477-.72-1.699-.81-.231-.08-.392-.12-.562.12-.171.25-.644.81-.784.97-.141.17-.292.19-.543.06-.251-.12-1.055-.39-2-1.230-.744-.66-1.236-1.470-1.387-1.720-.141-.25-.02-.38.111-.51.11-.11.251-.29.371-.43.121-.14.171-.25.252-.41.08-.17.04-.31-.02-.43-.061-.12-.563-1.34-.764-1.840-.201-.48-.412-.42-.563-.43h-.482c-.171 0-.433.06-.664.31-.221.25-.864.85-.864 2.070s.894 2.4 1.015 2.56c.121.17 1.759 2.67 4.251 3.74.593.26 1.056.41 1.417.52.593.19 1.136.16 1.568.1.483-.07 1.478-.6 1.679-1.180.211-.58.211-1.070.14-1.180-.07-.11-.221-.16-.472-.28z"/></svg>
+</a>
 
-<script>
-  (function(){
-    var names = ["Mariana G.","Carlos R.","Fernanda S.","Juliana M.","Rafael A.","Patrícia L.","Bruno C.","Camila F.","Diego P.","Larissa T.","Eduardo N.","Beatriz O.","Thiago V.","Amanda K.","Gustavo B.","Vanessa D.","Rodrigo H.","Priscila Q.","Marcelo J.","Aline W.","Renata P.","Felipe M.","Débora S.","Leonardo C.","Natália B."];
-    var times = ["agora mesmo","há 1 minuto","há 2 minutos","há 4 minutos","há 6 minutos","há 9 minutos"];
-    var el = document.getElementById('social-proof');
-    var nameEl = document.getElementById('sp-name');
-    var avatarEl = document.getElementById('sp-avatar');
-    var timeEl = document.getElementById('sp-time');
-    var closeBtn = document.getElementById('sp-close');
-    var dismissedByUser = false;
-    var hideTimeout = null;
-
-    function initials(name){
-      var parts = name.split(' ');
-      return (parts[0] ? parts[0][0] : '') + (parts[1] ? parts[1][0] : '');
-    }
-
-    function showNotification(){
-      if(dismissedByUser) return;
-      var name = names[Math.floor(Math.random()*names.length)];
-      var time = times[Math.floor(Math.random()*times.length)];
-      nameEl.textContent = name;
-      avatarEl.textContent = initials(name);
-      timeEl.textContent = time;
-      el.classList.add('show');
-      clearTimeout(hideTimeout);
-      hideTimeout = setTimeout(function(){
-        el.classList.remove('show');
-      }, 5000);
-    }
-
-    function scheduleNext(){
-      var delay = 9000 + Math.random()*13000;
-      setTimeout(function(){
-        showNotification();
-        scheduleNext();
-      }, delay);
-    }
-
-    closeBtn.addEventListener('click', function(){
-      dismissedByUser = true;
-      el.classList.remove('show');
-    });
-
-    setTimeout(function(){
-      showNotification();
-      scheduleNext();
-    }, 4000);
-  })();
-</script>
-
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.13/dist/lenis.min.js"></script>
+<script src="../assets/js/escola.js"></script>
+<script src="../assets/js/dashboard.js"></script>
 </body>
 </html>
