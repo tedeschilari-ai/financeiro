@@ -113,7 +113,7 @@
 .cel .txt h2{text-align:left}
 .cel .txt p{color:var(--muted);margin-top:18px;font-size:17.5px}
 .cel .lista{list-style:none;display:grid;gap:10px;margin-top:24px}
-.cel .lista li{display:flex;gap:12px;align-items:center;font-weight:500;font-size:15.5px}
+.cel .lista li{display:flex;gap:12px;align-items:center;text-align:left;font-weight:500;font-size:15.5px}
 .cel .lista svg{flex:none}
 .cel .platform{margin:0}
 .cel .platform .frame{border:0;box-shadow:none;overflow:visible;border-radius:0;background:none}
@@ -330,3 +330,7 @@
   .trust span{font-size:12px;padding:6px 10px}
 }
 @media (prefers-reduced-motion:reduce){.bal,.recibo li{opacity:1!important;transform:none!important}}
+
+/* rodapé enxuto das versões de tráfego: só a linha de direitos */
+.foot.foot-min{padding:28px 0 100px}
+.foot.foot-min .copy{margin-top:0;padding-top:0;border-top:0;text-align:center}
