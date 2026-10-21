@@ -228,12 +228,13 @@
    ========================================================= */
 
 /* faixa de aviso no topo */
-.aviso{position:relative;z-index:26;background:var(--verm);color:#fff;text-align:center;font-size:13.5px;font-weight:600;letter-spacing:-.01em;padding:10px 16px;line-height:1.35}
-.aviso+.nav+.hero,.aviso+.nav+header.hero{margin-top:-68px}
+.aviso{position:sticky;top:0;z-index:30;background:var(--verm);color:#fff;text-align:center;font-size:17px;font-weight:700;letter-spacing:-.02em;padding:14px 16px;line-height:1.3;box-shadow:0 8px 24px -12px rgba(230,72,63,.7)}
+/* versões de tráfego: sem menu, a faixa vermelha é o que fica fixo no topo */
+.aviso+.hero{margin-top:0;padding-top:80px}
 
 /* selos de confiança embaixo do botão */
-.trust{display:flex;justify-content:center;flex-wrap:wrap;gap:8px;margin-top:18px}
-.trust span{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--muted);padding:7px 12px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:var(--card-shadow)}
+.trust{display:flex;justify-content:center;flex-wrap:wrap;gap:6px 18px;margin-top:16px}
+.trust span{display:inline-flex;align-items:center;gap:6px;font-size:13.5px;font-weight:500;color:var(--muted);white-space:nowrap}
 .hero .chamada{margin-top:14px;font-size:17px;font-weight:600;color:var(--accent-2)}
 .hero .tit-pre{display:block;font-size:.55em;letter-spacing:-.03em;color:var(--muted);margin-bottom:.15em}
 .hero-quote{display:inline-flex;align-items:center;gap:10px;margin-top:22px;padding:10px 16px 10px 10px;border-radius:999px;background:var(--card);border:1px solid var(--line);box-shadow:var(--card-shadow);font-size:14.5px;font-style:italic;color:var(--muted)}
@@ -322,12 +323,14 @@
   .passo:not(:last-child)::after{content:"↓";right:auto;left:50%;top:auto;bottom:-13px;translate:-50% 0}
 }
 @media (max-width:640px){
-  .aviso{font-size:12.5px;padding:9px 12px}
+  .aviso{font-size:16px;padding:13px 12px}
+  .aviso+.hero{padding-top:56px}
   .recibo{padding:24px 18px 38px;rotate:0deg}
   .recibo li{font-size:14px}
   .bal{font-size:14.5px}
   .destaque-txt{padding:20px;font-size:16.5px}
-  .trust span{font-size:12px;padding:6px 10px}
+  .trust{gap:6px 8px;margin-left:-8px;margin-right:-8px}
+  .trust span{font-size:11.5px;gap:3px;letter-spacing:-.02em}
 }
 @media (prefers-reduced-motion:reduce){.bal,.recibo li{opacity:1!important;transform:none!important}}
 
