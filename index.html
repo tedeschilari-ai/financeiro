@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="app-version" content="32" />
+<meta name="app-version" content="33" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#8670FF" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -3638,16 +3638,87 @@ function mobSelectAllToggle(tipo,checked){
 // Exclui um único lançamento (usado pelo botão "Excluir" da folha de detalhes mobile — a exclusão
 // em massa (deleteSelectedRows) já existe pra seleção múltipla, isso aqui é o equivalente pra 1 item só).
 function excluirTransacaoUnica(tipo,id){
-  const item=(tipo==='entradas'?state.entradas:state.despesas).find(x=>x.id===id);
-  const msg=(item&&item.transferPairId)
-    ?'Este lançamento veio de uma Transferência entre contas. Deseja mesmo excluí-lo? A outra transação da transferência (a outra ponta) NÃO será excluída. Esta ação não pode ser desfeita.'
-    :'Deseja mesmo excluir este lançamento? Esta ação não pode ser desfeita.';
-  if(!confirm(msg))return;
-  pushUndo('Excluir lançamento');
-  if(tipo==='entradas')state.entradas=state.entradas.filter(x=>x.id!==id);
-  else state.despesas=state.despesas.filter(x=>x.id!==id);
-  saveState();closeModal();renderAll();flashSave();
-  showToast('Item excluído');
+  _excluirComOpcoes(tipo,new Set([id]),()=>{});
+}
+// 28/10/2026 — a pedido da Lari (revisão): a exclusão ganhou uma janela com opções no lugar do
+// confirm() simples. (1) FIXA que já tem meses antes do mês em exibição: excluir apagava o histórico
+// inteiro e mudava o saldo dos meses passados — agora o padrão é ENCERRAR (dataFinal = mês anterior),
+// mantendo o passado; "excluir tudo" continua disponível. (2) Um lado de TRANSFERÊNCIA: oferece
+// excluir também o outro lado (marcado por padrão) — antes sobrava uma ponta solta desalinhando as
+// contas. (3) O texto antigo dizia "não pode ser desfeita", mas pushUndo permite desfazer.
+// Antes de trocar o valor-base de uma fixa: congela o valor antigo nos meses anteriores ao mês em
+// exibição (só onde não existe ajuste próprio), pra o saldo do passado não mudar sozinho.
+function _congelarValorFixaAntes(obj,edit,mkLimite){
+  let mk=(edit.data||edit.ativoDesde||'').slice(0,7);
+  if(!mk)return;
+  if(!obj.valoresMes)obj.valoresMes={};
+  let guard=0;
+  while(mk<mkLimite&&guard++<600){
+    if(obj.valoresMes[mk]===undefined)obj.valoresMes[mk]=Number(edit.valor);
+    const[y,m]=mk.split('-').map(Number);mk=m===12?mkOf(y+1,1):mkOf(y,m+1);
+  }
+}
+// Antes de trocar o valor-base de uma fixa: congela o valor antigo nos meses anteriores ao mês em
+// exibição (só onde não existe ajuste próprio), pra o saldo do passado não mudar sozinho.
+function _congelarValorFixaAntes(obj,edit,mkLimite){
+  let mk=(edit.data||edit.ativoDesde||'').slice(0,7);
+  if(!mk)return;
+  if(!obj.valoresMes)obj.valoresMes={};
+  let guard=0;
+  while(mk<mkLimite&&guard++<600){
+    if(obj.valoresMes[mk]===undefined)obj.valoresMes[mk]=Number(edit.valor);
+    const[y,m]=mk.split('-').map(Number);mk=m===12?mkOf(y+1,1):mkOf(y,m+1);
+  }
+}
+function _mkAnterior(mk){const[y,m]=mk.split('-').map(Number);return m===1?mkOf(y-1,12):mkOf(y,m-1);}
+function _nomeMk(mk){const[y,m]=mk.split('-').map(Number);return MESES[m-1]+'/'+y;}
+function _excluirComOpcoes(tipo,ids,depois){
+  const arr=tipo==='entradas'?state.entradas:state.despesas;
+  const itens=arr.filter(x=>ids.has(x.id));
+  if(!itens.length)return;
+  const mkVisto=mkOf(currentYear,currentMonth);
+  const mkFim=_mkAnterior(mkVisto);
+  const fixasComHist=itens.filter(x=>x.fixa&&(x.data||x.ativoDesde||'').slice(0,7)<mkVisto);
+  const outrosLados=[];
+  itens.filter(x=>x.transferPairId).forEach(x=>{
+    const p=_paresTransferencia(x.transferPairId);
+    const outro=tipo==='entradas'?p.desp:p.ent;
+    if(outro&&!outrosLados.includes(outro))outrosLados.push(outro);
+  });
+  const n=itens.length;
+  const nf=fixasComHist.length;
+  const blocoFixa=nf?`<div class="full"><span style="font-weight:600;font-size:13px">${nf===1?`"${escape(fixasComHist[0].descricao||'Fixa')}" é fixa e já tem meses anteriores`:`${nf} dos itens são fixos e já têm meses anteriores`}</span>
+      <label style="display:flex;flex-direction:row;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer;font-size:14px;line-height:1.4;color:var(--text);font-weight:400"><input type="radio" name="modoFixa" value="encerrar" checked style="width:auto;flex:0 0 auto;margin:3px 0 0"><span><b>Encerrar a partir de ${_nomeMk(mkVisto)}</b> — os meses até ${_nomeMk(mkFim)} continuam no histórico e no saldo</span></label>
+      <label style="display:flex;flex-direction:row;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer;font-size:14px;line-height:1.4;color:var(--text);font-weight:400"><input type="radio" name="modoFixa" value="excluir" style="width:auto;flex:0 0 auto;margin:3px 0 0"><span><b>Excluir de todos os meses</b> — apaga também o histórico (o saldo dos meses anteriores muda)</span></label></div>`:'';
+  const blocoTransf=outrosLados.length?`<label class="full" style="display:flex;flex-direction:row;gap:10px;align-items:flex-start;margin:8px 0;cursor:pointer;font-size:14px;line-height:1.4;color:var(--text);font-weight:400"><input type="checkbox" name="outroLado" checked style="width:auto;flex:0 0 auto;margin:3px 0 0"><span>Excluir também o outro lado da transferência (${outrosLados.map(o=>escape(o.descricao||'')).join(', ')}) — senão as contas ficam desalinhadas</span></label>`:'';
+  openModal(`<h3>${n===1?'Excluir lançamento':`Excluir ${n} lançamentos`}</h3>
+    <p class="muted">${n===1?`Excluir "${escape(itens[0].descricao||'')}"?`:`Excluir os ${n} itens selecionados?`}</p>
+    <form id="frmExcluir" class="form-grid">
+      ${blocoFixa}${blocoTransf}
+      <p class="muted full" style="margin:0">Se mudar de ideia, dá pra desfazer logo em seguida (botão Desfazer ou Cmd+Z).</p>
+      <div class="modal-actions full"><button class="btn ghost" type="button" onclick="closeModal()">Cancelar</button><button class="btn danger" type="submit">Excluir</button></div>
+    </form>`);
+  document.getElementById('frmExcluir').addEventListener('submit',ev=>{
+    ev.preventDefault();
+    const d=Object.fromEntries(new FormData(ev.target));
+    const encerrar=nf&&d.modoFixa!=='excluir';
+    const apagarOutro=outrosLados.length&&d.outroLado==='on';
+    pushUndo('Excluir lançamento');
+    const idsApagar=new Set(itens.map(x=>x.id));
+    let nEncerradas=0;
+    if(encerrar){fixasComHist.forEach(x=>{x.dataFinal=mkFim;idsApagar.delete(x.id);nEncerradas++;});}
+    if(tipo==='entradas')state.entradas=state.entradas.filter(x=>!idsApagar.has(x.id));
+    else state.despesas=state.despesas.filter(x=>!idsApagar.has(x.id));
+    if(apagarOutro){
+      const outrosIds=new Set(outrosLados.map(o=>o.id));
+      if(tipo==='entradas')state.despesas=state.despesas.filter(x=>!outrosIds.has(x.id));
+      else state.entradas=state.entradas.filter(x=>!outrosIds.has(x.id));
+    }
+    if(depois)depois();
+    saveState();closeModal();renderAll();flashSave();
+    const nApagados=idsApagar.size+(apagarOutro?outrosLados.length:0);
+    showToast([nApagados?`${nApagados} ${nApagados===1?'item excluído':'itens excluídos'}`:'',nEncerradas?`${nEncerradas} ${nEncerradas===1?'fixa encerrada':'fixas encerradas'} a partir de ${_nomeMk(mkVisto)}`:''].filter(Boolean).join(' · '));
+  });
 }
 // Folha de detalhes que abre ao tocar num card mobile — mostra tudo que a tabela mostraria em
 // colunas (Categoria, Subcategoria, Conta, Pagamento, Recorrência/Parcela) só que empilhado,
@@ -3978,21 +4049,7 @@ function updateSelBar(tipo){
 }
 function deleteSelectedRows(tipo){
   const s=_rowSel[tipo];if(s.size===0)return;
-  const n=s.size;
-  // 11/09/2026 — a pedido da Lari: se algum dos selecionados veio de uma Transferência entre
-  // contas (transferPairId), avisa que a outra ponta NÃO é apagada em cascata — mesmo aviso da
-  // exclusão individual (excluirTransacaoUnica), só que cobrindo seleção múltipla.
-  const lista=tipo==='entradas'?state.entradas:state.despesas;
-  const temTransf=lista.some(x=>s.has(x.id)&&x.transferPairId);
-  const avisoTransf=temTransf?' Um ou mais itens vieram de uma Transferência entre contas — a(s) outra(s) ponta(s) NÃO será(ão) excluída(s) junto.':'';
-  const msg=(n===1?'Deseja mesmo excluir o item selecionado?':`Deseja mesmo excluir os ${n} itens selecionados?`)+avisoTransf+' Esta ação não pode ser desfeita.';
-  if(!confirm(msg))return;
-  pushUndo('Excluir selecionados');
-  if(tipo==='entradas'){state.entradas=state.entradas.filter(x=>!s.has(x.id));}
-  else{state.despesas=state.despesas.filter(x=>!s.has(x.id));}
-  s.clear();updateSelBar(tipo);
-  saveState();renderAll();flashSave();
-  showToast(`${n} ${n===1?'item excluído':'itens excluídos'}`);
+  _excluirComOpcoes(tipo,new Set(s),()=>{s.clear();updateSelBar(tipo);});
 }
 // Move os itens selecionados (Entradas/Despesas/Fatura) para uma conta bancária escolhida —
 // útil pra migrar lançamentos antigos (feitos antes de cadastrar as contas) pro cartão/conta certos.
@@ -4447,8 +4504,11 @@ function formEntrada(edit,isDup,parcKeyCtx){
             <span class="fx-label">Último mês (opcional)</span>
             ${monthPickerHTML(e.dataFinal||'','Ent')}
           </div>
+          ${(_isEditing&&_fixa&&(e.data||e.ativoDesde||'').slice(0,7)<mkOf(currentYear,currentMonth))?`<div class="fx-field"><span class="fx-label">Se mudar o valor, ele vale${campoAjuda('Os meses anteriores guardam o valor antigo, pra não mudar o saldo do passado. Escolha "todos os meses" só se o valor antigo estava errado desde o começo.')}</span>
+            <label class="fx-check-row"><input type="radio" name="aplicarValor" value="apartir" checked><span>A partir de ${MESES[currentMonth-1]}/${currentYear} (os meses anteriores ficam como estão)</span></label>
+            <label class="fx-check-row"><input type="radio" name="aplicarValor" value="todos"><span>Em todos os meses, inclusive os anteriores</span></label></div>`:''}
         </div>
-        <label class="fx-check-row"><input name="pago" type="checkbox" ${_checkedPagoEnt?'checked':''}><span>Já recebido (entra no saldo)${_fixa?'':campoAjuda('Se marcar como recebido sem escolher uma Data de recebimento: usa a data de recebimento de HOJE. Você pode alterar a data depois.')}</span></label>
+        <label class="fx-check-row"><input name="pago" type="checkbox" ${_checkedPagoEnt?'checked':''}><span>Já recebido (entra no saldo)${_fixa?'':campoAjuda('Se marcar como recebido sem escolher uma Data de recebimento: usa a data de vencimento (ou a de hoje, se o vencimento ainda não chegou). Você pode alterar a data depois.')}</span></label>
       </div>
       <div class="fx-footer">
         <button class="fx-btn-ghost" type="button" onclick="closeModal()">Cancelar</button>
@@ -4502,9 +4562,23 @@ function formEntrada(edit,isDup,parcKeyCtx){
     _registrarUltimaContaUsada(obj.contaBancariaId);
     if(_parcelasEnt>1&&!obj.fixa)_avisarSeDataFutura(obj.pagosParcelasData[_parcKeyEditEnt]);
     else if(!obj.fixa)_avisarSeDataFutura(obj.dataPagamento);
-    pushUndo(_isEditing?'Editar entrada':'Nova entrada');if(_isEditing){const i=state.entradas.findIndex(x=>x.id===edit.id);state.entradas[i]=obj;}else state.entradas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Entrada adicionada');flashSave();});
+    pushUndo(_isEditing?'Editar entrada':'Nova entrada');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.entradas.findIndex(x=>x.id===edit.id);state.entradas[i]=obj;}else state.entradas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Entrada adicionada');flashSave();});
 }
-function editEntrada(id,parcKey){const e=state.entradas.find(x=>x.id===id);if(e)formEntrada(e,false,parcKey);}
+// 28/10/2026 — BUG: o lápis de um lado de uma transferência abria o formulário comum de entrada/
+// despesa, que monta o lançamento do zero e perdia o transferPairId — o lado editado virava uma
+// entrada/despesa normal (passava a contar nos KPIs/Lucro/gráficos) e o outro lado ficava com o
+// valor antigo. Agora, se os dois lados existem, abre o formulário de Transferência em modo edição.
+function _paresTransferencia(pairId){
+  return{desp:state.despesas.find(x=>x.transferPairId===pairId),ent:state.entradas.find(x=>x.transferPairId===pairId)};
+}
+function _editarComoTransferencia(item){
+  if(!item||!item.transferPairId)return false;
+  const p=_paresTransferencia(item.transferPairId);
+  if(!p.desp||!p.ent)return false; // lado órfão (o outro foi excluído): edita no formulário comum, mantendo o vínculo
+  formTransferencia(item.transferPairId);
+  return true;
+}
+function editEntrada(id,parcKey){const e=state.entradas.find(x=>x.id===id);if(!e)return;if(_editarComoTransferencia(e))return;formEntrada(e,false,parcKey);}
 function duplicarEntrada(id){const e=state.entradas.find(x=>x.id===id);if(!e)return;formEntrada({...e,pago:false,pagos:{},pagosParcelas:{},dataPagamento:null,pagosData:{},pagosParcelasData:{}},true);}
 
 // Formulário único de despesa (débito e crédito unificados). A forma de pagamento escolhida
@@ -4609,12 +4683,15 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
             <span class="fx-label">Último mês (opcional)</span>
             ${monthPickerHTML(e.dataFinal||'','Desp')}
           </div>
+          ${(_isEditing&&_fixa&&(e.data||e.ativoDesde||'').slice(0,7)<mkOf(currentYear,currentMonth))?`<div class="fx-field"><span class="fx-label">Se mudar o valor, ele vale${campoAjuda('Os meses anteriores guardam o valor antigo, pra não mudar o saldo do passado. Escolha "todos os meses" só se o valor antigo estava errado desde o começo.')}</span>
+            <label class="fx-check-row"><input type="radio" name="aplicarValor" value="apartir" checked><span>A partir de ${MESES[currentMonth-1]}/${currentYear} (os meses anteriores ficam como estão)</span></label>
+            <label class="fx-check-row"><input type="radio" name="aplicarValor" value="todos"><span>Em todos os meses, inclusive os anteriores</span></label></div>`:''}
         </div>
         <div class="fx-field" id="rowMesFaturaDesp" style="display:${(tipo==='credito'&&!_fixa&&Number(e.parcelas||1)<=1)?'flex':'none'}">
           <span class="fx-label">Mês da fatura${campoAjuda('Em qual fatura essa compra vai entrar e ser cobrada.')}</span>
           ${mesFaturaPickerHTML(e.mesFatura||'')}
         </div>
-        <label class="fx-check-row" id="rowPagoDesp"><input name="pago" type="checkbox" ${_checkedPagoDesp?'checked':''}><span><span id="rowPagoLabelDesp">${tipo==='credito'?'Já confirmada':'Já paga (entra no saldo)'}</span>${_fixa?'':campoAjuda(tipo==='credito'?'Esse check é só uma confirmação pessoal, pra você ir batendo com o extrato — não desconta do saldo. Só a fatura marcada como paga na aba Fatura desconta de verdade.':'Se marcar como paga sem escolher uma Data de pagamento: usa a data de pagamento de HOJE. Você pode alterar a data depois.')}</span></label>
+        <label class="fx-check-row" id="rowPagoDesp"><input name="pago" type="checkbox" ${_checkedPagoDesp?'checked':''}><span><span id="rowPagoLabelDesp">${tipo==='credito'?'Já confirmada':'Já paga (entra no saldo)'}</span>${_fixa?'':campoAjuda(tipo==='credito'?'Esse check é só uma confirmação pessoal, pra você ir batendo com o extrato — não desconta do saldo. Só a fatura marcada como paga na aba Fatura desconta de verdade.':'Se marcar como paga sem escolher uma Data de pagamento: usa a data de vencimento (ou a de hoje, se o vencimento ainda não chegou). Você pode alterar a data depois.')}</span></label>
       </div>
       <div class="fx-footer">
         <button class="fx-btn-ghost" type="button" onclick="closeModal()">Cancelar</button>
@@ -4712,20 +4789,26 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
     _registrarUltimaContaUsada(_contaFinal);
     if(_parcelasDesp>1&&!_fixaOn)_avisarSeDataFutura(obj.pagosParcelasData[_parcKeyEditDesp]);
     else if(!_fixaOn)_avisarSeDataFutura(obj.dataPagamento);
-    pushUndo(_isEditing?'Editar despesa':'Nova despesa');if(_isEditing){const i=state.despesas.findIndex(x=>x.id===edit.id);state.despesas[i]=obj;}else state.despesas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Despesa adicionada');flashSave();});
+    pushUndo(_isEditing?'Editar despesa':'Nova despesa');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.despesas.findIndex(x=>x.id===edit.id);state.despesas[i]=obj;}else state.despesas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Despesa adicionada');flashSave();});
 }
-function editDespesa(id,parcKey){const e=state.despesas.find(x=>x.id===id);if(e)formDespesa(e,undefined,false,parcKey);}
+function editDespesa(id,parcKey){const e=state.despesas.find(x=>x.id===id);if(!e)return;if(_editarComoTransferencia(e))return;formDespesa(e,undefined,false,parcKey);}
 function duplicarDespesa(id){const d=state.despesas.find(x=>x.id===id);if(!d)return;formDespesa({...d,pago:false,pagos:{},pagosParcelas:{},dataPagamento:null,pagosData:{},pagosParcelasData:{}},d.tipo,true);}
-function formTransferencia(){
+function formTransferencia(editPairId){
   if(state.contasBancarias.length<2)return;
   const contas=state.contasBancarias;
-  const _deInit=_contaBancariaPadrao()||contas[0].id;
-  const _paraInit=(contas.find(c=>c.id!==_deInit)||contas[0]).id;
+  const _ed=editPairId?_paresTransferencia(editPairId):null;
+  const _editando=!!(_ed&&_ed.desp&&_ed.ent);
+  const _deInit=_editando?_ed.desp.contaBancariaId:(_contaBancariaPadrao()||contas[0].id);
+  const _paraInit=_editando?_ed.ent.contaBancariaId:(contas.find(c=>c.id!==_deInit)||contas[0]).id;
+  const _valorInit=_editando?(Number(_ed.desp.valor)||0).toFixed(2).replace('.',','):'';
+  const _dataInit=_editando?(_ed.desp.dataPagamento||_ed.desp.data):todayISO();
+  const _fpInit=_editando?(_ed.desp.formaPagamento||'pix'):'pix';
+  const _obsInit=_editando?(_ed.desp.observacao||''):'';
   const _initCatDespT=state.config.categoriasDespesas[0]||'';
   const _initCatEntT=state.config.categoriasEntradas[0]||'';
   openModal(`<div class="fx-card">
     <div class="fx-head">
-      <h3 class="fx-title">Transferência entre contas</h3>
+      <h3 class="fx-title">${_editando?'Editar transferência':'Transferência entre contas'}</h3>
       <button type="button" class="fx-x" onclick="closeModal()" title="Fechar" aria-label="Fechar"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="10" cy="10" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M7.5 7.5l5 5M12.5 7.5l-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></button>
     </div>
     <form id="frm">
@@ -4733,15 +4816,15 @@ function formTransferencia(){
         <div class="transf-swap"><span class="transf-pill" id="transfPillDe"></span><span class="transf-arrow">→</span><span class="transf-pill" id="transfPillPara"></span></div>
         <div class="fx-row">
           <label class="fx-field"><span class="fx-label">De (sai desta conta)</span><select class="fx-select" name="deConta" id="transfDeConta" onchange="_atualizarSwapTransf()">${contaBancariaOptions(_deInit,null,true)}</select></label>
-          <label class="fx-field"><span class="fx-label">Para (entra nesta conta)</span><select class="fx-select" name="paraConta" id="transfParaConta" onchange="_atualizarSwapTransf()">${contaBancariaOptions(_paraInit,null,true)}<option value="__fora__">Conta fora do dashboard</option></select>
+          <label class="fx-field"><span class="fx-label">Para (entra nesta conta)</span><select class="fx-select" name="paraConta" id="transfParaConta" onchange="_atualizarSwapTransf()">${contaBancariaOptions(_paraInit,null,true)}${_editando?'':'<option value="__fora__">Conta fora do dashboard</option>'}</select>
             <span class="fx-hint" id="transfAvisoMesma" style="display:none;color:var(--danger)">As duas contas precisam ser diferentes</span>
           </label>
         </div>
         <div class="fx-row">
-          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" required onblur="evalValor(this)" placeholder="0,00"><span class="fx-hint">Aceita cálculos — ex: 1500×2</span></label>
-          <label class="fx-field"><span class="fx-label">Data</span><input class="fx-input" name="data" type="date" value="${todayISO()}" required></label>
+          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" required onblur="evalValor(this)" placeholder="0,00" value="${escape(_valorInit)}"><span class="fx-hint">Aceita cálculos — ex: 1500×2</span></label>
+          <label class="fx-field"><span class="fx-label">Data</span><input class="fx-input" name="data" type="date" value="${_dataInit}" required></label>
         </div>
-        <label class="fx-field"><span class="fx-label">Forma de pagamento</span><select class="fx-select" name="formaPagamento">${formaTransfOptionsHTML('pix')}</select></label>
+        <label class="fx-field"><span class="fx-label">Forma de pagamento</span><select class="fx-select" name="formaPagamento">${formaTransfOptionsHTML(_fpInit)}</select></label>
         <div id="transfForaBox" style="display:none">
           <div class="fx-hint" style="margin:-2px 0 10px">O dinheiro vai sair do seu controle (ex.: pagamento a outra pessoa), então será registrado como uma <b>despesa normal</b>.</div>
           <label class="fx-field" style="margin-bottom:8px"><span class="fx-label">Descrição</span><input class="fx-input" name="descFora" placeholder="Ex: Pix para Maria"></label>
@@ -4751,11 +4834,11 @@ function formTransferencia(){
           </div>
         </div>
         <div class="fx-hint" id="transfNotaInterna" style="margin:-2px 0 10px">↔ Muda o saldo das duas contas, mas não conta como despesa nem como entrada.</div>
-        <label class="fx-field"><span class="fx-label">Observação (opcional)</span><input class="fx-input" name="observacao" placeholder="Adicione uma nota..."></label>
+        <label class="fx-field"><span class="fx-label">Observação (opcional)</span><input class="fx-input" name="observacao" placeholder="Adicione uma nota..." value="${escape(_obsInit)}"></label>
       </div>
       <div class="fx-footer">
         <button class="fx-btn-ghost" type="button" onclick="closeModal()">Cancelar</button>
-        <button class="fx-btn-primary" type="submit">Salvar transferência</button>
+        <button class="fx-btn-primary" type="submit">${_editando?'Salvar alterações':'Salvar transferência'}</button>
       </div>
     </form>
   </div>`,'fx-bare');
@@ -4814,6 +4897,17 @@ function formTransferencia(){
       state.despesas.push(despFora);
       _registrarUltimaContaUsada(deContaId);
       saveState();closeModal();renderAll();showToast('Registrada como despesa');flashSave();
+      return;
+    }
+    if(_editando){
+      // Atualiza os DOIS lados juntos (mesmo valor/data/forma/observação), mantendo ids e vínculo.
+      const _de=_ed.desp,_en=_ed.ent;
+      pushUndo('Editar transferência');
+      [_de,_en].forEach(o=>{o.valor=valor;o.data=data;o.dataPagamento=data;o.pago=true;o.formaPagamento=fp;o.observacao=obs;});
+      _de.contaBancariaId=deContaId;_en.contaBancariaId=paraContaId;
+      if(/^Transferência para /.test(_de.descricao||''))_de.descricao=`Transferência para ${contaPara?contaPara.nome:'outra conta'}`;
+      if(/^Transferência de /.test(_en.descricao||''))_en.descricao=`Transferência de ${contaDe?contaDe.nome:'outra conta'}`;
+      saveState();closeModal();renderAll();showToast('Transferência atualizada');flashSave();
       return;
     }
     const transferPairId=uid();
@@ -7254,7 +7348,7 @@ async function _trocarContaAtivaRemovidaRemotamente() {
 // isso pra recusar gravações de versões antigas do app que ainda estejam abertas/em cache em algum
 // aparelho — que eram justamente as que sobrescreviam os dados dos clientes com uma cópia velha.
 // IMPORTANTE: ao lançar uma versão nova, aumente APP_VERSION aqui E o <meta name="app-version"> no topo.
-const APP_VERSION = 32;
+const APP_VERSION = 33;
 function _carimboVersao() {
   const FV = (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue) || fbDb.FieldValue;
   return { _appV: APP_VERSION, _appTs: FV.serverTimestamp() };
