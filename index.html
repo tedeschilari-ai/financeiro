@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="app-version" content="33" />
+<meta name="app-version" content="34" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#8670FF" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -563,6 +563,10 @@ document.addEventListener('DOMContentLoaded', function () {
   .modal{background:var(--card);border:1px solid var(--border);border-radius:16px;width:100%;max-width:560px;padding:22px;animation:pop .2s ease;box-shadow:0 20px 60px rgba(16,24,40,.2);max-height:90vh;overflow-y:auto}
   .modal.wide{max-width:760px}
   .modal.xwide{max-width:90vw;width:90vw}
+  /* 03/11/2026: caso real — janelas abriam achatadas (conteúdo lado a lado) no Chrome de uma usuária.
+     O nome "modal" é muito comum e estilos de fora (ex.: extensões) podem acertar essa classe.
+     Esta regra garante o formato da janela mesmo assim. */
+  #modal>#modalContent{display:block!important;height:auto!important;min-height:0!important;max-height:90vh!important;flex:none!important;position:relative!important;top:auto!important;left:auto!important;overflow-y:auto!important}
   @keyframes pop{from{transform:translateY(8px);opacity:0}to{transform:translateY(0);opacity:1}}
   .modal h3{font-size:16px;font-weight:700;margin-bottom:6px;color:var(--text)}
   .modal p.muted{font-size:12px;color:var(--muted);margin-bottom:16px}
@@ -7348,7 +7352,7 @@ async function _trocarContaAtivaRemovidaRemotamente() {
 // isso pra recusar gravações de versões antigas do app que ainda estejam abertas/em cache em algum
 // aparelho — que eram justamente as que sobrescreviam os dados dos clientes com uma cópia velha.
 // IMPORTANTE: ao lançar uma versão nova, aumente APP_VERSION aqui E o <meta name="app-version"> no topo.
-const APP_VERSION = 33;
+const APP_VERSION = 34;
 function _carimboVersao() {
   const FV = (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue) || fbDb.FieldValue;
   return { _appV: APP_VERSION, _appTs: FV.serverTimestamp() };
