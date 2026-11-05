@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8" />
-<meta name="app-version" content="34" />
+<meta name="app-version" content="35" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <meta name="theme-color" content="#8670FF" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -1885,6 +1885,20 @@ function _contaBancariaPadrao(){
   if(state.contasBancarias.length===1)return state.contasBancarias[0].id;
   return '';
 }
+// 04/11/2026 — a pedido da Lari: quem filtra um cartão/conta e clica em "Nova" quase sempre quer lançar
+// ali. Sem filtro (ou se a conta não aceita essa forma de pagamento), segue o padrão de sempre.
+function _contaDoFiltroOuPadrao(formaPag){
+  const c=currentContaFilter?state.contasBancarias.find(x=>x.id===currentContaFilter):null;
+  if(!c||(formaPag&&c[formaPag]===false))return{conta:_contaBancariaPadrao(),cartao:''};
+  const cartoes=c.cartoes||[];
+  let cartao='';
+  if(cartoes.length>1){
+    const existe=id=>cartoes.some(ct=>ct.id===id);
+    const ultima=[...state.despesas].reverse().find(d=>d.contaBancariaId===c.id&&existe(d.cartaoId));
+    cartao=existe(currentCartaoFilter)?currentCartaoFilter:(ultima?ultima.cartaoId:cartoes[0].id);
+  }
+  return{conta:c.id,cartao};
+}
 function _registrarUltimaContaUsada(contaId){
   if(!contaId)return;
   state.config._ultimaContaUsada=contaId;
@@ -2088,7 +2102,22 @@ function dataDefaultPeriodo(){
   const diaFinal=Math.min(dia,ultimoDia);
   return `${y}-${String(m).padStart(2,'0')}-${String(diaFinal).padStart(2,'0')}`;
 }
-function showToast(msg,type='success'){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast '+type,2200);}
+function showToast(msg,type='success',ms=2200){const t=document.getElementById('toast');t.textContent=msg;t.className='toast show '+type;setTimeout(()=>t.className='toast '+type,ms);}
+// 04/11/2026 — lançamento salvo que não aparece na tela atual parecia "sumido": explica o motivo.
+function _nomeContaCartao(contaId,cartaoId){
+  const c=contaId?contaBancariaById(contaId):null;
+  if(!c)return'sem conta';
+  const ct=cartaoById(c,cartaoId);
+  return c.nome+(ct?': '+ct.nome:'');
+}
+function _toastAposSalvar(item,msgNormal){
+  if(expandItem(item).some(noPeriodo))return showToast(msgNormal);
+  const foraDoFiltro=(currentContaFilter&&item.contaBancariaId!==currentContaFilter)||(currentCartaoFilter&&(item.cartaoId||'')!==currentCartaoFilter);
+  const msg=foraDoFiltro
+    ?`Salvo em ${_nomeContaCartao(item.contaBancariaId,item.cartaoId)}. Não aparece aqui porque o filtro está em ${_nomeContaCartao(currentContaFilter,currentCartaoFilter)}.`
+    :`Salvo. Não aparece aqui porque fica em outro ${currentView==='anual'?'ano':'mês'}.`;
+  showToast(msg,'success',6000);
+}
 function flashSave(){const e=document.querySelector('.save-indicator');if(!e)return;e.style.transform='scale(1.08)';setTimeout(()=>e.style.transform='scale(1)',200);}
 
 // ─── UNDO ───
@@ -3854,7 +3883,7 @@ function tabelaDespesas(items,isFixa,tipo){
   const _groupContaD=shouldGroupByConta(items);
   let _renderItemsD=items,_contaMapD=null,_lastKeyD=null;
   if(_groupContaD){const g=contaGroupOrder(items);_renderItemsD=g.order.flatMap(k=>g.map[k]);_contaMapD=g;}
-  return`<div class="table-scroll-wrap"><table class="table-main tbl-fixed">${_tblColgroupHTML(tipo)}<thead><tr><th><input type="checkbox" class="sel-cb" ${allSel?'checked':''} onchange="selectAllInGroup('${tipo}',${idsJs},this.checked)" title="Selecionar todos"></th><th>${isFixa?'Vence dia':'Data'}</th><th class="col-descricao">Descrição</th><th class="col-categoria">Categoria</th><th class="col-subcategoria">Subcategoria</th><th class="col-contabancaria">Conta</th><th class="col-pagamento">Pagamento</th><th class="col-parcela">${isFixa?'Mês ref.':'Parcela'}</th><th>${tipo==='credito'?'Confirmado':'Pago'} ${_bulkBtnD}</th><th style="text-align:right">Valor</th><th style="text-align:right">Ações</th></tr></thead><tbody>${_renderItemsD.map(i=>{let subheadD='';if(_groupContaD){const k=i.contaBancariaId||'_none';if(k!==_lastKeyD){_lastKeyD=k;subheadD=contaSubheadRowHTML(i.contaBancariaId,_contaMapD.map[k].length,11);}}const click=isFixa?`togglePagoDespesa('${i.id}','${i.mesRef}')`:`togglePagoDespesa('${i.id}','${i.mesRef}','${i.parcKey||0}')`;const origItemD=state.despesas.find(x=>x.id===i.id);const subcatD=origItemD?origItemD.subcategoria||'':'';const obsD=i.observacao?`<span class="row-obs">${escape(i.observacao)}</span>`:'';const vencTag=vencimentoTagHTML(i);const _corAjuste=(Number(i.valor)<0)?'#047857':'#dc2626';const valorCell=isFixa&&i.hasValorCustom?`<span style="color:${_corAjuste};font-weight:700">${Number(i.valor)<0?'-':''}${fmtMoney(Math.abs(i.valor))}</span> <span class="pill parcelado" style="font-size:10px;cursor:pointer" title="Valor ajustado para este mês — clique para editar" onclick="ajustarValorMes('${i.id}','${i.mesRef}')">adj.</span>`:(Number(i.valor)<0?'-':'')+fmtMoney(Math.abs(i.valor));const btnAjuste=isFixa?`<button class="icon-btn edit" onclick="ajustarValorMes('${i.id}','${i.mesRef}')" title="Ajustar valor deste mês">${ICO_ADJUST}</button>`:'';const isSel=sel.has(i.id);return`${subheadD}<tr class="${isFixa?'fixa-pin':''}${isSel?' row-selected':''}"><td><input type="checkbox" class="sel-cb" data-sel-id="${i.id}" ${isSel?'checked':''} onchange="toggleRowSel('${tipo}','${i.id}',this)"></td><td>${dataCellComEdicaoHTML(i,'despesa',isFixa?`dia ${i.diaVencimento||formatBR(i.dataVencimento||i.data).slice(0,2)}`:undefined)}</td><td class="col-descricao">${escape(i.descricao||'-')}${vencTag}${obsD}</td><td class="col-categoria">${catSelect(i.id,i.categoria||'Outros','despesa')}</td><td class="col-subcategoria">${subcatSelect(i.id,i.categoria||'Outros',subcatD,'despesa')}</td><td class="col-contabancaria">${contaSelectInline(i.id,i.contaBancariaId,'despesa')}</td><td class="col-pagamento">${formaPagSelectInline(i.id,i.formaPagamento,'despesa',tipo)}</td><td class="col-parcela">${isFixa?`<span class="pill fixa">${i.mesRef}</span>`:parcelaCellHTML(i)}</td><td>${pillPagoToggle(i.pagoEfetivo,click,_lblPagoD,tipo==='credito'?'não confirmado':'pendente')}</td><td style="text-align:right;color:${_corAjuste};font-weight:700">${valorCell}</td><td><div class="row-actions">${btnAjuste}<button class="icon-btn edit" onclick="duplicarDespesa('${i.id}')" title="Duplicar">${ICO_DUPLICATE}</button><button class="icon-btn edit" onclick="editDespesa('${i.id}','${i.parcKey!==undefined&&i.parcKey!==null?i.parcKey:''}')" title="Editar tudo">${ICO_EDIT}</button></div></td></tr>`;}).join('')}</tbody></table></div>${mobTxListHTML(_renderItemsD,tipo,isFixa)}`;
+  return`<div class="table-scroll-wrap"><table class="table-main tbl-fixed">${_tblColgroupHTML(tipo)}<thead><tr><th><input type="checkbox" class="sel-cb" ${allSel?'checked':''} onchange="selectAllInGroup('${tipo}',${idsJs},this.checked)" title="Selecionar todos"></th><th>${isFixa?'Vence dia':'Data'}</th><th class="col-descricao">Descrição</th><th class="col-categoria">Categoria</th><th class="col-subcategoria">Subcategoria</th><th class="col-contabancaria">Conta</th><th class="col-pagamento">Pagamento</th><th class="col-parcela">${isFixa?'Mês ref.':'Parcela'}</th><th>${tipo==='credito'?'Confirmado':'Pago'} ${_bulkBtnD}</th><th style="text-align:right">Valor</th><th style="text-align:right">Ações</th></tr></thead><tbody>${_renderItemsD.map(i=>{let subheadD='';if(_groupContaD){const k=i.contaBancariaId||'_none';if(k!==_lastKeyD){_lastKeyD=k;subheadD=contaSubheadRowHTML(i.contaBancariaId,_contaMapD.map[k].length,11);}}const click=isFixa?`togglePagoDespesa('${i.id}','${i.mesRef}')`:`togglePagoDespesa('${i.id}','${i.mesRef}','${i.parcKey||0}')`;const origItemD=state.despesas.find(x=>x.id===i.id);const subcatD=origItemD?origItemD.subcategoria||'':'';const obsD=i.observacao?`<span class="row-obs">${escape(i.observacao)}</span>`:'';const vencTag=vencimentoTagHTML(i);const _corAjuste=(Number(i.valor)<0)?'#047857':'#dc2626';const valorCell=isFixa&&i.hasValorCustom?`<span style="color:${_corAjuste};font-weight:700">${Number(i.valor)<0?'-':''}${fmtMoney(Math.abs(i.valor))}</span> <span class="pill parcelado" style="font-size:10px;cursor:pointer" title="Valor ajustado para este mês — clique para editar" onclick="ajustarValorMes('${i.id}','${i.mesRef}')">adj.</span>`:(Number(i.valor)<0?'-':'')+fmtMoney(Math.abs(i.valor));const btnAjuste=isFixa?`<button class="icon-btn edit" onclick="ajustarValorMes('${i.id}','${i.mesRef}')" title="Ajustar valor deste mês">${ICO_ADJUST}</button>`:'';const isSel=sel.has(i.id);return`${subheadD}<tr class="${isFixa?'fixa-pin':''}${isSel?' row-selected':''}"><td><input type="checkbox" class="sel-cb" data-sel-id="${i.id}" ${isSel?'checked':''} onchange="toggleRowSel('${tipo}','${i.id}',this)"></td><td>${dataCellComEdicaoHTML(i,'despesa',isFixa?`dia ${i.diaVencimento||formatBR(i.dataVencimento||i.data).slice(0,2)}`:undefined)}</td><td class="col-descricao">${escape(i.descricao||'-')}${vencTag}${obsD}</td><td class="col-categoria">${catSelect(i.id,i.categoria||'Outros','despesa')}</td><td class="col-subcategoria">${subcatSelect(i.id,i.categoria||'Outros',subcatD,'despesa')}</td><td class="col-contabancaria">${contaSelectInline(i.id,i.contaBancariaId,'despesa',i.tipo==='credito',i.cartaoId)}</td><td class="col-pagamento">${formaPagSelectInline(i.id,i.formaPagamento,'despesa',tipo)}</td><td class="col-parcela">${isFixa?`<span class="pill fixa">${i.mesRef}</span>`:parcelaCellHTML(i)}</td><td>${pillPagoToggle(i.pagoEfetivo,click,_lblPagoD,tipo==='credito'?'não confirmado':'pendente')}</td><td style="text-align:right;color:${_corAjuste};font-weight:700">${valorCell}</td><td><div class="row-actions">${btnAjuste}<button class="icon-btn edit" onclick="duplicarDespesa('${i.id}')" title="Duplicar">${ICO_DUPLICATE}</button><button class="icon-btn edit" onclick="editDespesa('${i.id}','${i.parcKey!==undefined&&i.parcKey!==null?i.parcKey:''}')" title="Editar tudo">${ICO_EDIT}</button></div></td></tr>`;}).join('')}</tbody></table></div>${mobTxListHTML(_renderItemsD,tipo,isFixa)}`;
 }
 function renderDespesasTotals(items,tag,tipo){
   const fix=items.filter(i=>i.isFixa);const va=items.filter(i=>!i.isFixa);
@@ -4060,10 +4089,13 @@ function deleteSelectedRows(tipo){
 function formMoverSelecionados(tipo){
   const s=_rowSel[tipo];if(!s||s.size===0)return;
   const n=s.size;
-  openModal(`<h3>Mover para conta</h3><p class="muted">Escolha a conta bancária para onde ${n===1?'o item selecionado vai':`os ${n} itens selecionados vão`}. Útil pra organizar lançamentos antigos que ainda não têm conta vinculada.</p><form id="frm" class="form-grid"><label class="full">Conta bancária<select class="fx-select" name="contaBancariaId" required>${contaBancariaOptions('')}</select></label><div class="modal-actions full"><button class="btn ghost" type="button" onclick="closeModal()">Cancelar</button><button class="btn primary" type="submit">Mover</button></div></form>`,'wide');
+  // 04/11/2026: na Fatura, contas com 2+ cartões aparecem cartão por cartão (igual ao lápis).
+  const _ehCredito=tipo==='credito';
+  openModal(`<h3>Mover para ${_ehCredito?'conta ou cartão':'conta'}</h3><p class="muted">Escolha ${_ehCredito?'a conta ou o cartão':'a conta bancária'} para onde ${n===1?'o item selecionado vai':`os ${n} itens selecionados vão`}. Útil pra organizar lançamentos antigos que ainda não têm conta vinculada.</p><form id="frm" class="form-grid"><label class="full">${_ehCredito?'Conta ou cartão':'Conta bancária'}<select class="fx-select" name="contaBancariaId" required>${_ehCredito?contaBancariaOptionsComCartao('',''):contaBancariaOptions('')}</select></label><div class="modal-actions full"><button class="btn ghost" type="button" onclick="closeModal()">Cancelar</button><button class="btn primary" type="submit">Mover</button></div></form>`,'wide');
   document.getElementById('frm').addEventListener('submit',ev=>{ev.preventDefault();const d=Object.fromEntries(new FormData(ev.target));moverSelecionadosParaConta(tipo,d.contaBancariaId);});
 }
-function moverSelecionadosParaConta(tipo,contaId){
+function moverSelecionadosParaConta(tipo,destino){
+  const[contaId,cartaoId]=String(destino||'').includes('::')?destino.split('::'):[destino,''];
   const s=_rowSel[tipo];if(!s||s.size===0){closeModal();return;}
   const n=s.size;
   pushUndo('Mover selecionados para conta');
@@ -4082,21 +4114,22 @@ function moverSelecionadosParaConta(tipo,contaId){
   let faturasJaPagasAvisar=0;
   arr.forEach(x=>{
     if(!s.has(x.id))return;
-    if(tipo==='credito'&&x.contaBancariaId!==contaId){
+    if(tipo==='credito'&&(x.contaBancariaId!==contaId||(x.cartaoId||'')!==cartaoId)){
       // 11/09/2026 — a pedido da Lari (pagamento parcial de fatura): avisa mesmo que só tenha
       // registrado um pagamento PARCIAL (não precisa estar quitada) — qualquer valor já registrado
       // contra a chave antiga fica órfão ao mudar de conta.
       if(faturaTotalPago(x.mesRef,x.contaBancariaId,x.cartaoId)>0)faturasJaPagasAvisar++;
-      x.cartaoId='';
+      x.cartaoId=cartaoId;
     }
     x.contaBancariaId=contaId||'';
   });
   s.clear();updateSelBar(tipo);
   saveState();closeModal();renderAll();flashSave();
   const c=contaId?contaBancariaById(contaId):null;
-  showToast(`${n} ${n===1?'item movido':'itens movidos'} para ${c?escape(c.nome):'sem conta'}`);
+  const ct=cartaoById(c,cartaoId);
+  showToast(`${n} ${n===1?'item movido':'itens movidos'} para ${c?escape(c.nome)+(ct?': '+escape(ct.nome):''):'sem conta'}`);
   if(faturasJaPagasAvisar>0){
-    setTimeout(()=>{alert(`Atenção: ${faturasJaPagasAvisar>1?'algumas das faturas movidas já estavam':'a fatura movida já estava'} marcada${faturasJaPagasAvisar>1?'s':''} como paga${faturasJaPagasAvisar>1?'s':''}. Como o pagamento da fatura é registrado por conta (e cartão), você vai precisar marcar a fatura como paga de novo na conta nova, na aba Fatura — senão ela volta a aparecer como pendente.`);},300);
+    setTimeout(()=>{alert(`Atenção: ${faturasJaPagasAvisar>1?'algumas das faturas movidas já estavam':'a fatura movida já estava'} marcada${faturasJaPagasAvisar>1?'s':''} como paga${faturasJaPagasAvisar>1?'s':''}. Como o pagamento da fatura é registrado por conta (e cartão), você vai precisar marcar a fatura como paga de novo no destino, na aba Fatura — senão ela volta a aparecer como pendente.`);},300);
   }
 }
 // Aplica forma de pagamento/recebimento em massa nos itens selecionados
@@ -4176,21 +4209,48 @@ function aplicarSubcategoriaSelecionados(tipo,subcategoria){
   saveState();closeModal();renderAll();flashSave();
   showToast(`Subcategoria aplicada em ${n} ${n===1?'item':'itens'}`);
 }
-function addMetaValor(id){const v=prompt('Valor a adicionar:');if(v===null)return;const n=Number(String(v).replace(',','.'));if(isNaN(n))return showToast('Inválido','error');const m=state.metas.find(x=>x.id===id);if(!m)return;pushUndo('Atualizar meta');m.acumulado=Number(m.acumulado||0)+n;saveState();renderAll();showToast('Meta atualizada');flashSave();}
+function addMetaValor(id){const v=prompt('Valor a adicionar:');if(v===null)return;const n=parseValorBR(v);if(isNaN(n))return showToast('Inválido','error');const m=state.metas.find(x=>x.id===id);if(!m)return;pushUndo('Atualizar meta');m.acumulado=Number(m.acumulado||0)+n;saveState();renderAll();showToast('Meta atualizada');flashSave();}
 
 // ============ MODAL & FORMS ============
+// 04/11/2026: BUG CORRIGIDO — "×", "x" e "÷" eram descartados antes do cálculo, então "1500×2" (o
+// exemplo da própria dica do campo) virava 15002 em vez de 3000. Agora viram * e / de verdade.
+function normalizaOperadores(s){return String(s).replace(/[×xX]/g,'*').replace(/÷/g,'/').replace(/[−–]/g,'-');}
+// 04/11/2026: caso real — "1.500,00" era salvo como R$ 0,00 e "1.500" como R$ 1,50, sem nenhum aviso.
+// Regra: com ponto E vírgula, o último é o decimal. Só vírgula = decimal. Só ponto = decimal, exceto
+// quando vem seguido de exatamente 3 dígitos ("1.500" = mil e quinhentos). Não entendeu = NaN.
+const MSG_VALOR_INVALIDO='Não entendi esse valor. Use, por exemplo, 1.500,00 ou 150,50';
+function parseValorBR(v){
+  if(typeof v==='number')return v;
+  let t=String(v==null?'':v).replace(/\s/g,'').replace(/R\$/gi,'');
+  const neg=t[0]==='-';
+  if(neg||t[0]==='+')t=t.slice(1);
+  t=t.replace(/[.,]$/,'');
+  if(!/^[\d.,]*\d$/.test(t))return NaN;
+  const c=t.lastIndexOf(','),p=t.lastIndexOf('.');
+  const emGrupos=(x,sep)=>x.split(sep).every((g,i)=>i===0?/^\d{1,3}$/.test(g):/^\d{3}$/.test(g));
+  let n;
+  if(c>=0&&p>=0){
+    const dec=c>p?',':'.',mil=c>p?'.':',';
+    const partes=t.split(dec);
+    if(partes.length!==2||partes[1].includes(mil)||!emGrupos(partes[0],mil))return NaN;
+    n=Number(partes[0].split(mil).join('')+'.'+partes[1]);
+  }else if(c>=0){
+    if(t.indexOf(',')===c)n=Number(t.replace(',','.'));
+    else n=emGrupos(t,',')?Number(t.split(',').join('')):NaN;
+  }else if(p>=0&&t.indexOf('.')!==p){
+    n=emGrupos(t,'.')?Number(t.split('.').join('')):NaN;
+  }else if(/^[1-9]\d{0,2}\.\d{3}$/.test(t)){
+    n=Number(t.replace('.',''));
+  }else n=Number(t);
+  return neg?-n:n;
+}
+// Valor guardado indo pro campo de texto: com vírgula, senão 33.333 (parcela) seria lido como 33 mil.
+function _valorParaCampo(v){return v?String(v).replace('.',','):'';}
 function evalValor(inp){
-  const raw=(inp.value||'').replace(/\s/g,'').replace(/,/g,'.');
-  if(!raw)return;
-  if(/^[\d.]+$/.test(raw))return; // já é número puro
-  try{
-    const cleaned=raw.replace(/[^0-9+\-*/.()]/g,'');
-    // eslint-disable-next-line no-new-func
-    const result=Function('"use strict";return ('+cleaned+')')();
-    if(typeof result==='number'&&isFinite(result)&&result>=0){
-      inp.value=parseFloat(result.toFixed(2));
-    }
-  }catch(e){}
+  const raw=(inp.value||'').trim();
+  if(!raw||!isNaN(parseValorBR(raw)))return; // número simples: é lido ao salvar
+  const r=safeCalc(raw);
+  if(r!==null&&r>=0)inp.value=String(r).replace('.',',');
 }
 // 04/08/2026 — ícone de ajuda "?" ao lado dos campos dos formulários (Entrada, Despesa, Fatura),
 // pra ninguém ficar em dúvida sobre o que cada campo faz (pedido da Lari). No desktop, passa o
@@ -4471,10 +4531,10 @@ function formEntrada(edit,isDup,parcKeyCtx){
         </div>
         <div class="fx-row">
           <label class="fx-field"><span class="fx-label">Forma de recebimento${campoAjuda('Como esse valor vai entrar. Só muda as opções de conta disponíveis a seguir.')}</span><select class="fx-select" name="formaPagamento" id="frmFormaPagEnt" onchange="_onFormaPagEntChange()">${formaRecebOptionsHTML(e.formaPagamento||'pix')}</select></label>
-          <label class="fx-field"><span class="fx-label">Conta${campoAjuda('Em qual conta bancária esse valor vai cair.')}</span><select class="fx-select" name="contaBancariaId" id="frmContaEnt" ${state.contasBancarias.length>0?'required':''}>${contaBancariaOptions(e.contaBancariaId||_contaBancariaPadrao(),e.formaPagamento||'pix',true)}</select></label>
+          <label class="fx-field"><span class="fx-label">Conta${campoAjuda('Em qual conta bancária esse valor vai cair.')}</span><select class="fx-select" name="contaBancariaId" id="frmContaEnt" ${state.contasBancarias.length>0?'required':''}>${contaBancariaOptions(edit?(e.contaBancariaId||_contaBancariaPadrao()):_contaDoFiltroOuPadrao(e.formaPagamento||'pix').conta,e.formaPagamento||'pix',true)}</select></label>
         </div>
         <div class="fx-row">
-          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" value="${e.valor||''}" required onblur="evalValor(this)" placeholder="0,00"><span class="fx-hint">Aceita cálculos — ex: 1500×2</span></label>
+          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" value="${_valorParaCampo(e.valor)}" required onblur="evalValor(this)" placeholder="0,00"><span class="fx-hint">Aceita cálculos — ex: 1500*2</span></label>
           <label class="fx-field" id="rowDataEnt" style="display:${_fixa?'none':'flex'}"><span class="fx-label">Data de vencimento${campoAjuda(_travarVencParcEnt?'Entrada parcelada: a data de vencimento de cada parcela é calculada sozinha (a partir da data da 1ª parcela, +1 mês a cada parcela seguinte). Por isso esse campo fica travado depois de criada — mudar aqui deslocaria a série inteira, fazendo parcelas "sumirem" dos meses onde você esperava vê-las.':'Serve só de referência/lembrete — não afeta o saldo sozinha. Se você marcar como recebida sem informar uma Data de recebimento, é essa data que conta no saldo.')}</span><input class="fx-input" name="data" type="${_travarVencParcEnt?'text':'date'}" data-iso="${e.data||dataDefaultPeriodo()}" value="${_travarVencParcEnt?formatBR(e.data):(e.data||dataDefaultPeriodo())}" ${_fixa?'':'required'} ${_travarVencParcEnt?'disabled title="Travado: entrada parcelada — a data de cada parcela é calculada automaticamente"':''}></label>
         </div>
         <div class="fx-row" id="rowParcelasEnt" style="display:${_fixa?'none':'flex'}">
@@ -4554,7 +4614,7 @@ function formEntrada(edit,isDup,parcKeyCtx){
   window._onFormaPagEntChange=function(){const fp=document.getElementById('frmFormaPagEnt').value;const contaSel=document.getElementById('frmContaEnt');if(contaSel){const cur=contaSel.value||_contaBancariaPadrao();contaSel.innerHTML=contaBancariaOptions(cur,fp,true);}};
   _wireParcInicial('rowParcInicialEnt','parcInicialHintEnt');
   _wireTravarVencimentoParcelado('rowDataEnt',_isEditing);
-  document.getElementById('frm').addEventListener('submit',ev=>{ev.preventDefault();const _vi=ev.target.querySelector('[name="valor"]');if(_vi)evalValor(_vi);const d=Object.fromEntries(new FormData(ev.target));const _parcelasEnt=Number(d.parcelas)||1;const _pagoOnEnt=d.pago==='on';const obj={id:_isEditing?edit.id:uid(),descricao:d.descricao,observacao:d.observacao||'',valor:Number(String(d.valor).replace(',','.')),data:d.data||e.data,categoria:d.categoria,subcategoria:d.subcategoria&&d.subcategoria!=='__new__'?d.subcategoria:'',formaPagamento:d.formaPagamento||'pix',contaBancariaId:d.contaBancariaId||'',parcelas:_parcelasEnt,parcelaInicial:Math.min(_parcelasEnt,Math.max(1,Number(d.parcelaInicial)||1)),fixa:d.fixa==='on',diaVencimento:Number(d.diaVencimento)||10,dataFinal:d.dataFinal||null,dataPagamento:_pagoOnEnt?(d.dataPagamento||null):null,pago:_pagoOnEnt,pagos:_isEditing&&edit.pagos?edit.pagos:{},pagosParcelas:_isEditing&&edit.pagosParcelas?edit.pagosParcelas:{},pagosData:_isEditing&&edit.pagosData?edit.pagosData:{},pagosParcelasData:_isEditing&&edit.pagosParcelasData?edit.pagosParcelasData:{}};if(obj.fixa){const _mesFixaAtualEnt=mkOf(currentYear,currentMonth);const _valFixaPagEnt=d.dataPagamentoFixaMes;if(_valFixaPagEnt){obj.pagosData[_mesFixaAtualEnt]=_valFixaPagEnt;obj.pagos[_mesFixaAtualEnt]=true;}else if(obj.pagosData[_mesFixaAtualEnt]){delete obj.pagosData[_mesFixaAtualEnt];delete obj.pagos[_mesFixaAtualEnt];}}
+  document.getElementById('frm').addEventListener('submit',ev=>{ev.preventDefault();const _vi=ev.target.querySelector('[name="valor"]');if(_vi)evalValor(_vi);const d=Object.fromEntries(new FormData(ev.target));const _valorLido=parseValorBR(d.valor);if(isNaN(_valorLido)){showToast(MSG_VALOR_INVALIDO,'error');return;}const _parcelasEnt=Number(d.parcelas)||1;const _pagoOnEnt=d.pago==='on';const obj={id:_isEditing?edit.id:uid(),descricao:d.descricao,observacao:d.observacao||'',valor:_valorLido,data:d.data||e.data,categoria:d.categoria,subcategoria:d.subcategoria&&d.subcategoria!=='__new__'?d.subcategoria:'',formaPagamento:d.formaPagamento||'pix',contaBancariaId:d.contaBancariaId||'',parcelas:_parcelasEnt,parcelaInicial:Math.min(_parcelasEnt,Math.max(1,Number(d.parcelaInicial)||1)),fixa:d.fixa==='on',diaVencimento:Number(d.diaVencimento)||10,dataFinal:d.dataFinal||null,dataPagamento:_pagoOnEnt?(d.dataPagamento||null):null,pago:_pagoOnEnt,pagos:_isEditing&&edit.pagos?edit.pagos:{},pagosParcelas:_isEditing&&edit.pagosParcelas?edit.pagosParcelas:{},pagosData:_isEditing&&edit.pagosData?edit.pagosData:{},pagosParcelasData:_isEditing&&edit.pagosParcelasData?edit.pagosParcelasData:{}};if(obj.fixa){const _mesFixaAtualEnt=mkOf(currentYear,currentMonth);const _valFixaPagEnt=d.dataPagamentoFixaMes;if(_valFixaPagEnt){obj.pagosData[_mesFixaAtualEnt]=_valFixaPagEnt;obj.pagos[_mesFixaAtualEnt]=true;}else if(obj.pagosData[_mesFixaAtualEnt]){delete obj.pagosData[_mesFixaAtualEnt];delete obj.pagos[_mesFixaAtualEnt];}}
     // 28/08/2026 — a pedido da Lari: numa entrada PARCELADA, o checkbox "Já recebido"/"Data de
     // recebimento" deste modal controla a PARCELA específica que estava sendo editada
     // (_parcKeyEditEnt — a que a pessoa clicou "editar" na tabela), não sempre a 1ª.
@@ -4566,7 +4626,7 @@ function formEntrada(edit,isDup,parcKeyCtx){
     _registrarUltimaContaUsada(obj.contaBancariaId);
     if(_parcelasEnt>1&&!obj.fixa)_avisarSeDataFutura(obj.pagosParcelasData[_parcKeyEditEnt]);
     else if(!obj.fixa)_avisarSeDataFutura(obj.dataPagamento);
-    pushUndo(_isEditing?'Editar entrada':'Nova entrada');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.entradas.findIndex(x=>x.id===edit.id);state.entradas[i]=obj;}else state.entradas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Entrada adicionada');flashSave();});
+    pushUndo(_isEditing?'Editar entrada':'Nova entrada');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.entradas.findIndex(x=>x.id===edit.id);state.entradas[i]=obj;}else state.entradas.push(obj);saveState();closeModal();renderAll();_toastAposSalvar(obj,_isEditing?'Atualizada':'Entrada adicionada');flashSave();});
 }
 // 28/10/2026 — BUG: o lápis de um lado de uma transferência abria o formulário comum de entrada/
 // despesa, que monta o lançamento do zero e perdia o transferPairId — o lado editado virava uma
@@ -4593,6 +4653,7 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
   const e=edit||{};
   const _formaPagInit=e.formaPagamento||tipoDefault||(e.tipo==='credito'?'credito':'debito');
   const tipo=_formaPagInit==='credito'?'credito':'debito';
+  const _destinoInit=edit?{conta:e.contaBancariaId||_contaBancariaPadrao(),cartao:e.cartaoId||''}:_contaDoFiltroOuPadrao(_formaPagInit);
   const _isEditing=!!edit&&!isDup;
   const _initCatDesp=e.categoria||(state.config.categoriasDespesas[0]||'');
   const _fixa=!!e.fixa;
@@ -4650,10 +4711,10 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
         </div>
         <div class="fx-row">
           <label class="fx-field"><span class="fx-label">Forma de pagamento${campoAjuda('Como esse valor vai ser pago. Escolher "Cartão de crédito" faz essa despesa cair automaticamente na Fatura, em vez de aparecer em Despesas.')}</span><select class="fx-select" name="formaPagamento" id="frmFormaPagDesp" onchange="_onFormaPagDespChange()">${formaPagOptionsHTML(_formaPagInit)}</select></label>
-          <label class="fx-field"><span class="fx-label">Conta${campoAjuda('De qual conta bancária (ou cartão, se a forma de pagamento for crédito) esse valor vai sair.')}</span><select class="fx-select" name="contaBancariaId" id="frmContaDesp" ${state.contasBancarias.length>0?'required':''}>${tipo==='credito'?contaBancariaOptionsComCartao(e.contaBancariaId||_contaBancariaPadrao(),e.cartaoId||'',_formaPagInit,true):contaBancariaOptions(e.contaBancariaId||_contaBancariaPadrao(),_formaPagInit,true)}</select></label>
+          <label class="fx-field"><span class="fx-label">Conta${campoAjuda('De qual conta bancária (ou cartão, se a forma de pagamento for crédito) esse valor vai sair.')}</span><select class="fx-select" name="contaBancariaId" id="frmContaDesp" ${state.contasBancarias.length>0?'required':''}>${tipo==='credito'?contaBancariaOptionsComCartao(_destinoInit.conta,_destinoInit.cartao,_formaPagInit,true):contaBancariaOptions(_destinoInit.conta,_formaPagInit,true)}</select></label>
         </div>
         <div class="fx-row">
-          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" value="${e.valor||''}" required onblur="evalValor(this)" placeholder="0,00"><span class="fx-hint">Aceita cálculos — ex: 1500×2</span></label>
+          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" value="${_valorParaCampo(e.valor)}" required onblur="evalValor(this)" placeholder="0,00"><span class="fx-hint">Aceita cálculos — ex: 1500*2</span></label>
           <label class="fx-field" id="rowDataDesp" style="display:${_fixa?'none':'flex'}"><span class="fx-label">Data de vencimento${campoAjuda(_travarVencParcDesp?'Compra parcelada: a data de vencimento de cada parcela é calculada sozinha (a partir da data da 1ª parcela, +1 mês a cada parcela seguinte). Por isso esse campo fica travado depois de criada a compra — mudar aqui deslocaria a série inteira, fazendo parcelas "sumirem" dos meses onde você esperava vê-las.':'Serve só de referência/lembrete — não afeta o saldo sozinha. Se você marcar como paga sem informar uma Data de pagamento, é essa data que conta no saldo.')}</span><input class="fx-input" name="data" type="${_travarVencParcDesp?'text':'date'}" data-iso="${e.data||dataDefaultPeriodo()}" value="${_travarVencParcDesp?formatBR(e.data):(e.data||dataDefaultPeriodo())}" ${_fixa?'':'required'} ${_travarVencParcDesp?'disabled title="Travado: compra parcelada — a data de cada parcela é calculada automaticamente"':''}></label>
         </div>
         <div class="fx-row" id="rowParcelasDesp" style="display:${_fixa?'none':'flex'}">
@@ -4780,7 +4841,7 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
   // precisar fechar e reabrir o formulário).
   document.querySelector('[name="parcelas"]')?.addEventListener('input',()=>window._onFormaPagDespChange());
   _wireTravarVencimentoParcelado('rowDataDesp',_isEditing);
-  document.getElementById('frm').addEventListener('submit',ev=>{ev.preventDefault();const _vi=ev.target.querySelector('[name="valor"]');if(_vi)evalValor(_vi);const d=Object.fromEntries(new FormData(ev.target));const _fixaOn=d.fixa==='on';const _fpFinal=d.formaPagamento||'debito';const tipoFinal=_fpFinal==='credito'?'credito':'debito';const _mfMes=d.mesFatura_mes,_mfAno=d.mesFatura_ano;const _mesFatura=tipoFinal==='credito'&&!_fixaOn&&_mfMes&&_mfAno?`${_mfAno}-${_mfMes}`:(_isEditing&&edit.mesFatura)||undefined;const _parcelasDesp=Number(d.parcelas)||1;const _contaRaw=d.contaBancariaId||'';const[_contaFinal,_cartaoFinal]=_contaRaw.includes('::')?_contaRaw.split('::'):[_contaRaw,''];const _pagoOn=d.pago==='on';const obj={id:_isEditing?edit.id:uid(),descricao:d.descricao,observacao:d.observacao||'',valor:Number(String(d.valor).replace(',','.')),data:d.data||e.data,tipo:tipoFinal,formaPagamento:_fpFinal,categoria:d.categoria,subcategoria:d.subcategoria&&d.subcategoria!=='__new__'?d.subcategoria:'',contaBancariaId:_contaFinal,cartaoId:_cartaoFinal,parcelas:_parcelasDesp,parcelaInicial:Math.min(_parcelasDesp,Math.max(1,Number(d.parcelaInicial)||1)),fixa:_fixaOn,diaVencimento:Number(d.diaVencimento)||10,dataFinal:d.dataFinal||null,vencimento:(_isEditing&&edit.vencimento)||null,dataPagamento:_pagoOn?(d.dataPagamento||null):null,pago:_pagoOn,pagos:_isEditing&&edit.pagos?edit.pagos:{},pagosParcelas:_isEditing&&edit.pagosParcelas?edit.pagosParcelas:{},pagosData:_isEditing&&edit.pagosData?edit.pagosData:{},pagosParcelasData:_isEditing&&edit.pagosParcelasData?edit.pagosParcelasData:{},...(_mesFatura?{mesFatura:_mesFatura}:{})};if(_fixaOn&&tipoFinal!=='credito'){const _mesFixaAtualDesp=mkOf(currentYear,currentMonth);const _valFixaPagDesp=d.dataPagamentoFixaMes;if(_valFixaPagDesp){obj.pagosData[_mesFixaAtualDesp]=_valFixaPagDesp;obj.pagos[_mesFixaAtualDesp]=true;}else if(obj.pagosData[_mesFixaAtualDesp]){delete obj.pagosData[_mesFixaAtualDesp];delete obj.pagos[_mesFixaAtualDesp];}}
+  document.getElementById('frm').addEventListener('submit',ev=>{ev.preventDefault();const _vi=ev.target.querySelector('[name="valor"]');if(_vi)evalValor(_vi);const d=Object.fromEntries(new FormData(ev.target));const _valorLido=parseValorBR(d.valor);if(isNaN(_valorLido)){showToast(MSG_VALOR_INVALIDO,'error');return;}const _fixaOn=d.fixa==='on';const _fpFinal=d.formaPagamento||'debito';const tipoFinal=_fpFinal==='credito'?'credito':'debito';const _mfMes=d.mesFatura_mes,_mfAno=d.mesFatura_ano;const _mesFatura=tipoFinal==='credito'&&!_fixaOn&&_mfMes&&_mfAno?`${_mfAno}-${_mfMes}`:(_isEditing&&edit.mesFatura)||undefined;const _parcelasDesp=Number(d.parcelas)||1;const _contaRaw=d.contaBancariaId||'';const[_contaFinal,_cartaoFinal]=_contaRaw.includes('::')?_contaRaw.split('::'):[_contaRaw,''];const _pagoOn=d.pago==='on';const obj={id:_isEditing?edit.id:uid(),descricao:d.descricao,observacao:d.observacao||'',valor:_valorLido,data:d.data||e.data,tipo:tipoFinal,formaPagamento:_fpFinal,categoria:d.categoria,subcategoria:d.subcategoria&&d.subcategoria!=='__new__'?d.subcategoria:'',contaBancariaId:_contaFinal,cartaoId:_cartaoFinal,parcelas:_parcelasDesp,parcelaInicial:Math.min(_parcelasDesp,Math.max(1,Number(d.parcelaInicial)||1)),fixa:_fixaOn,diaVencimento:Number(d.diaVencimento)||10,dataFinal:d.dataFinal||null,vencimento:(_isEditing&&edit.vencimento)||null,dataPagamento:_pagoOn?(d.dataPagamento||null):null,pago:_pagoOn,pagos:_isEditing&&edit.pagos?edit.pagos:{},pagosParcelas:_isEditing&&edit.pagosParcelas?edit.pagosParcelas:{},pagosData:_isEditing&&edit.pagosData?edit.pagosData:{},pagosParcelasData:_isEditing&&edit.pagosParcelasData?edit.pagosParcelasData:{},...(_mesFatura?{mesFatura:_mesFatura}:{})};if(_fixaOn&&tipoFinal!=='credito'){const _mesFixaAtualDesp=mkOf(currentYear,currentMonth);const _valFixaPagDesp=d.dataPagamentoFixaMes;if(_valFixaPagDesp){obj.pagosData[_mesFixaAtualDesp]=_valFixaPagDesp;obj.pagos[_mesFixaAtualDesp]=true;}else if(obj.pagosData[_mesFixaAtualDesp]){delete obj.pagosData[_mesFixaAtualDesp];delete obj.pagos[_mesFixaAtualDesp];}}
     // 28/08/2026 — a pedido da Lari: o checkbox "Já paga"/campo "Data de pagamento" deste modal,
     // numa despesa PARCELADA (débito), controla a PARCELA específica que estava sendo editada
     // (_parcKeyEditDesp — a que a pessoa clicou "editar" na tabela), não sempre a 1ª. Se marcada
@@ -4793,7 +4854,7 @@ function formDespesa(edit,tipoDefault,isDup,parcKeyCtx){
     _registrarUltimaContaUsada(_contaFinal);
     if(_parcelasDesp>1&&!_fixaOn)_avisarSeDataFutura(obj.pagosParcelasData[_parcKeyEditDesp]);
     else if(!_fixaOn)_avisarSeDataFutura(obj.dataPagamento);
-    pushUndo(_isEditing?'Editar despesa':'Nova despesa');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.despesas.findIndex(x=>x.id===edit.id);state.despesas[i]=obj;}else state.despesas.push(obj);saveState();closeModal();renderAll();showToast(_isEditing?'Atualizada':'Despesa adicionada');flashSave();});
+    pushUndo(_isEditing?'Editar despesa':'Nova despesa');if(_isEditing){if(edit.transferPairId){obj.transferPairId=edit.transferPairId;obj.transferLado=edit.transferLado;}obj.valoresMes={...(edit.valoresMes||{})};if(edit.fixa&&obj.fixa&&d.aplicarValor==='apartir'&&Number(obj.valor)!==Number(edit.valor))_congelarValorFixaAntes(obj,edit,mkOf(currentYear,currentMonth));const i=state.despesas.findIndex(x=>x.id===edit.id);state.despesas[i]=obj;}else state.despesas.push(obj);saveState();closeModal();renderAll();_toastAposSalvar(obj,_isEditing?'Atualizada':'Despesa adicionada');flashSave();});
 }
 function editDespesa(id,parcKey){const e=state.despesas.find(x=>x.id===id);if(!e)return;if(_editarComoTransferencia(e))return;formDespesa(e,undefined,false,parcKey);}
 function duplicarDespesa(id){const d=state.despesas.find(x=>x.id===id);if(!d)return;formDespesa({...d,pago:false,pagos:{},pagosParcelas:{},dataPagamento:null,pagosData:{},pagosParcelasData:{}},d.tipo,true);}
@@ -4825,7 +4886,7 @@ function formTransferencia(editPairId){
           </label>
         </div>
         <div class="fx-row">
-          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" required onblur="evalValor(this)" placeholder="0,00" value="${escape(_valorInit)}"><span class="fx-hint">Aceita cálculos — ex: 1500×2</span></label>
+          <label class="fx-field"><span class="fx-label">Valor (R$)</span><input class="fx-input" name="valor" type="text" inputmode="decimal" required onblur="evalValor(this)" placeholder="0,00" value="${escape(_valorInit)}"><span class="fx-hint">Aceita cálculos — ex: 1500*2</span></label>
           <label class="fx-field"><span class="fx-label">Data</span><input class="fx-input" name="data" type="date" value="${_dataInit}" required></label>
         </div>
         <label class="fx-field"><span class="fx-label">Forma de pagamento</span><select class="fx-select" name="formaPagamento">${formaTransfOptionsHTML(_fpInit)}</select></label>
@@ -4888,7 +4949,7 @@ function formTransferencia(editPairId){
     const deContaId=d.deConta,paraContaId=d.paraConta;
     if(!deContaId||!paraContaId||deContaId===paraContaId){showToast('Escolha duas contas diferentes','error');return;}
     const _foraDash=paraContaId==='__fora__';
-    const valor=Number(String(d.valor).replace(',','.'));
+    const valor=parseValorBR(d.valor);
     if(!valor||valor<=0){showToast('Informe um valor válido','error');return;}
     const contaDe=contaBancariaById(deContaId),contaPara=contaBancariaById(paraContaId);
     const data=d.data||todayISO();
@@ -4963,7 +5024,9 @@ function renderCatsForm(){
 }
 function salvarMetaCategoria(inp){
   const cat=inp.dataset.cat,tipo=inp.dataset.tipo;
-  const v=Math.max(0,Number(String(inp.value).replace(',','.'))||0);
+  const _lido=String(inp.value).trim()?parseValorBR(inp.value):0;
+  if(isNaN(_lido)){showToast(MSG_VALOR_INVALIDO,'error');return;}
+  const v=Math.max(0,_lido);
   const chave=tipo==='ent'?'metaCategoriaEntrada':'metaCategoriaDespesa';
   if(!state.config[chave])state.config[chave]={};
   if(v>0)state.config[chave][cat]=v; else delete state.config[chave][cat];
@@ -5101,7 +5164,9 @@ function renderConfigPage(){
   if(cfgMetaInvestido){
     cfgMetaInvestido.value=state.config.metaInvestidoMensal||'';
     cfgMetaInvestido.addEventListener('change',e=>{
-      state.config.metaInvestidoMensal=Math.max(0,Number(String(e.target.value).replace(',','.'))||0);
+      const _lido=String(e.target.value).trim()?parseValorBR(e.target.value):0;
+      if(isNaN(_lido)){showToast(MSG_VALOR_INVALIDO,'error');return;}
+      state.config.metaInvestidoMensal=Math.max(0,_lido);
       saveState();renderMetasBars();renderCharts();showToast('Meta de investimento atualizada');flashSave();
     });
   }
@@ -5365,7 +5430,7 @@ function aportarInvestimento(id){
   if(!inv)return;
   const v=prompt('Valor do aporte (use negativo pra resgatar/retirar):');
   if(v===null)return;
-  const n=Number(String(v).replace(',','.'));
+  const n=parseValorBR(v);
   if(isNaN(n)||n===0)return showToast('Valor inválido','error');
   pushUndo('Aporte em investimento');
   if(!inv.aportes)inv.aportes=[];
@@ -5430,7 +5495,7 @@ function novoAporte(tipo,id){
   const item=state[tipo].find(x=>x.id===id);if(!item)return;
   const dataEl=document.getElementById('novoAporteData'),valEl=document.getElementById('novoAporteValor');
   const data=(dataEl&&dataEl.value)||todayISO();
-  const n=Number(String(valEl?valEl.value:'').replace(',','.'));
+  const n=parseValorBR(valEl?valEl.value:'');
   if(!n)return showToast('Informe um valor','error');
   pushUndo('Novo aporte');
   if(!item.aportes)item.aportes=[];
@@ -5442,8 +5507,9 @@ function novoAporte(tipo,id){
 function editarAporte(tipo,id,aporteId,campo,valor){
   const item=state[tipo].find(x=>x.id===id);if(!item)return;
   const a=(item.aportes||[]).find(x=>x.id===aporteId);if(!a)return;
+  if(campo==='valor'&&isNaN(parseValorBR(valor))){showToast(MSG_VALOR_INVALIDO,'error');formAportes(tipo,id);return;}
   pushUndo('Editar aporte');
-  a[campo]=campo==='valor'?Number(String(valor).replace(',','.')):valor;
+  a[campo]=campo==='valor'?parseValorBR(valor):valor;
   if(tipo==='metas')item.acumulado=totalMeta(item);
   saveState();renderAll();flashSave();
   formAportes(tipo,id);
@@ -6528,7 +6594,7 @@ function mostrarPreview(trans,tipoDoc,catPadrao,mesFatura,contaBancariaId,cartao
       const desc=document.querySelector(`.prev-desc[data-i="${i}"]`).value;
       const tipoL=document.querySelector(`.prev-tipo[data-i="${i}"]`).value;
       const catRaw=document.querySelector(`.prev-cat[data-i="${i}"]`).value;
-      const val=Number(document.querySelector(`.prev-val[data-i="${i}"]`).value);
+      const val=parseValorBR(document.querySelector(`.prev-val[data-i="${i}"]`).value)||0;
       const contaLinha=(document.querySelector(`.prev-conta[data-i="${i}"]`)?.value)||'';
       // Investimento: vira um aporte na caixinha escolhida — não tem descrição, subcategoria
       // nem forma de pagamento (esses campos ficam travados/vazios pra esse tipo de linha).
@@ -6605,16 +6671,15 @@ function updateChromeForTab(t){
   if(titleEl)titleEl.textContent=TAB_TITULOS[t]||'Dashboard Financeiro';
   updateDashboardContaTheme();
 }
-// No Dashboard, quando uma conta específica está selecionada no filtro, o ícone de "Saldo em conta"
-// vira o cartão daquela conta e a cor do dashboard inteiro acompanha a cor da conta — só enquanto
-// "Todas as contas" não estiver selecionado. Saindo do Dashboard ou voltando pra "Todas as contas",
-// tudo volta a usar o tema configurado nas Configurações (não altera state.config.grad, é só visual).
+// Quando uma conta específica está selecionada no filtro, o ícone de "Saldo em conta" vira o cartão
+// daquela conta e a cor do app inteiro acompanha a cor da conta, em todas as páginas (04/11/2026, a
+// pedido da Lari). Com "Todas as contas" volta ao tema escolhido. Em Configurações também mostra o tema
+// escolhido, senão trocar a cor ali não teria efeito visível (não altera state.config.grad, é só visual).
 function updateDashboardContaTheme(){
   const icoEl=document.getElementById('kpiSaldoIcon');
   const c=currentContaFilter?contaBancariaById(currentContaFilter):null;
   if(icoEl)icoEl.innerHTML=c?cardIconSVG(c.cor||'#6366f1',20):'&#128179;';
-  const onDash=currentTab==='dashboard';
-  if(onDash&&c)applyCustomTheme(c.cor||'#6366f1');
+  if(c&&currentTab!=='config')applyCustomTheme(c.cor||'#6366f1');
   else applyTheme();
 }
 // Menu mobile: painel deslizante pela esquerda (com overlay), igual apps nativos.
@@ -6748,15 +6813,31 @@ function updateMesBadges(){
 }
 // ============ CALCULADORA INLINE EM INPUTS ============
 function safeCalc(expr){
-  // suporta + - * / ( ) e vírgula como decimal
-  const cleaned=String(expr).replace(/,/g,'.').replace(/[^\d+\-*/().]/g,'').trim();
-  if(!cleaned||!/[+\-*/]/.test(cleaned))return null;
+  // suporta + - * / ( ) e cada número pode vir em qualquer formato aceito por parseValorBR
+  const base=normalizaOperadores(String(expr).replace(/R\$/gi,'').replace(/\s/g,''));
+  const texto=base.replace(/[+\-*/]+$/,''); // operador sobrando no fim ("100*") é ignorado
+  if(!texto||!/[+\-*/]/.test(base)||/[^\d+\-*/().,]/.test(texto))return null;
+  let ok=true;
+  const cleaned=texto.replace(/[\d.,]+/g,t=>{const n=parseValorBR(t);if(isNaN(n))ok=false;return String(n);});
+  if(!ok)return null;
   try{const r=Function('"use strict";return('+cleaned+')')();if(typeof r==='number'&&isFinite(r))return Math.round(r*100)/100;}catch(e){}
   return null;
 }
+// Campo numérico sendo digitado como texto: calcula/normaliza. Valor que nem foi mexido fica como
+// está (33.333 guardado não pode virar 33 mil). Não entendeu = trava o envio do formulário e avisa.
+function _normalizarCampoNum(el){
+  el.setCustomValidity('');
+  const t=el.value.trim();
+  if(!t||el.value===el._valorFoco)return true;
+  const r=safeCalc(t);
+  const n=r!==null?r:parseValorBR(t);
+  if(isNaN(n)){el.setCustomValidity(MSG_VALOR_INVALIDO);return false;}
+  el.value=String(n);el._valorFoco=el.value;
+  return true;
+}
 // Ao focar num input numérico, muda para text temporariamente (permite digitar operadores)
 document.addEventListener('focusin',e=>{
-  if(e.target.tagName==='INPUT'&&e.target.type==='number'){e.target._wasNum=true;e.target.type='text';e.target.inputMode='decimal';}
+  if(e.target.tagName==='INPUT'&&e.target.type==='number'){e.target._wasNum=true;e.target._valorFoco=e.target.value;e.target.type='text';e.target.inputMode='decimal';}
 },true);
 // Ao sair do input, tenta calcular
 // 06/08/2026: BUG CORRIGIDO — cliente não conseguia logar pelo app instalado no iOS: digitava a
@@ -6773,22 +6854,17 @@ document.addEventListener('focusin',e=>{
 // (ou seja, que realmente começaram como type="number"), do mesmo jeito que o focusin já fazia.
 document.addEventListener('blur',e=>{
   const el=e.target;if(el.tagName!=='INPUT'||!el._wasNum)return;
-  const r=safeCalc(el.value);
-  if(r!==null){
-    el.value=r;
-  } else if(el.value){
-    // normalizar vírgula → ponto antes de voltar para type=number
-    // ex: "150,50" → "150.50" (senão o browser apaga o valor)
-    el.value=el.value.replace(/,/g,'.').trim();
-  }
+  if(!_normalizarCampoNum(el)){showToast(MSG_VALOR_INVALIDO,'error');return;}
   el.type='number';delete el._wasNum;
 },true);
 // Enter também calcula (sem fechar o formulário) — só em campos que já eram type="number".
 document.addEventListener('keydown',e=>{
   if(e.key!=='Enter'||e.target.tagName!=='INPUT'||!e.target._wasNum)return;
-  const r=safeCalc(e.target.value);
-  if(r!==null){e.target.value=r;e.preventDefault();}
+  const calculou=safeCalc(e.target.value)!==null;
+  _normalizarCampoNum(e.target);
+  if(calculou)e.preventDefault();
 },true);
+document.addEventListener('input',e=>{if(e.target._wasNum)e.target.setCustomValidity('');},true);
 
 // Cada cartão tem seu próprio fechamento/vencimento e geralmente é pago de uma conta diferente,
 // então "paga em" nunca deve ser uma data única agregando vários cartões. Com uma conta específica
@@ -6909,7 +6985,7 @@ function formRegistrarPagamentoFatura(mesRef,contaId,cartaoId,valorSugerido){
     ev.preventDefault();
     const _vi=ev.target.querySelector('[name="valor"]');if(_vi)evalValor(_vi);
     const d=Object.fromEntries(new FormData(ev.target));
-    const valor=Number(String(d.valor).replace(',','.'));
+    const valor=parseValorBR(d.valor);
     if(!valor||valor<=0){showToast('Informe um valor válido','error');return;}
     pushUndo('Registrar pagamento de fatura');
     registrarPagamentoFatura(mesRef,contaId||null,cartaoId||null,valor,d.data||todayISO(),d.obs||'');
@@ -7352,7 +7428,7 @@ async function _trocarContaAtivaRemovidaRemotamente() {
 // isso pra recusar gravações de versões antigas do app que ainda estejam abertas/em cache em algum
 // aparelho — que eram justamente as que sobrescreviam os dados dos clientes com uma cópia velha.
 // IMPORTANTE: ao lançar uma versão nova, aumente APP_VERSION aqui E o <meta name="app-version"> no topo.
-const APP_VERSION = 34;
+const APP_VERSION = 35;
 function _carimboVersao() {
   const FV = (typeof firebase !== 'undefined' && firebase.firestore && firebase.firestore.FieldValue) || fbDb.FieldValue;
   return { _appV: APP_VERSION, _appTs: FV.serverTimestamp() };
@@ -9616,16 +9692,25 @@ function handleCatChange(sel,itemId,tipo){
   refreshDerivedViews();
 }
 // ─── Conta, Pagamento e Parcela também editáveis direto na tabela (mesmo padrão de Categoria/Subcategoria) ───
-function contaSelectInline(itemId,currentContaId,tipo){
+function contaSelectInline(itemId,currentContaId,tipo,ehCredito,cartaoAtual){
   const c=currentContaId?contaBancariaById(currentContaId):null;
   const col=c?(c.cor||'#6366f1'):'#94a3b8';
   const rgb=hexToRgb(col);
   const r=rgb[0],g=rgb[1],b=rgb[2];
-  return`<select class="cat-sel" style="background:rgba(${r},${g},${b},.13);color:${col};border:1px solid rgba(${r},${g},${b},.3)" onchange="handleContaChangeInline(this,'${itemId}','${tipo}')">${contaBancariaOptions(currentContaId||'')}</select>`;
+  return`<select class="cat-sel" style="background:rgba(${r},${g},${b},.13);color:${col};border:1px solid rgba(${r},${g},${b},.3)" onchange="handleContaChangeInline(this,'${itemId}','${tipo}')">${ehCredito?contaBancariaOptionsComCartao(currentContaId||'',cartaoAtual||''):contaBancariaOptions(currentContaId||'')}</select>`;
 }
 function handleContaChangeInline(sel,itemId,tipo){
   const arr=tipo==='entrada'?state.entradas:state.despesas;
   const item=arr.find(x=>x.id===itemId);
+  if(item&&item.tipo==='credito'){
+    // 04/11/2026: mesma regra do "Mover para conta" — o cartão acompanha o destino, e o pagamento já
+    // registrado fica na fatura antiga (a pessoa precisa saber).
+    const[contaId,cartaoId]=sel.value.includes('::')?sel.value.split('::'):[sel.value,''];
+    const avisar=faturaTotalPago(item.mesRef,item.contaBancariaId,item.cartaoId)>0;
+    item.contaBancariaId=contaId||'';item.cartaoId=cartaoId;saveState();flashSave();renderAll();
+    if(avisar)setTimeout(()=>{alert('Atenção: a fatura de origem já tinha pagamento registrado. Esse pagamento continua nela — se precisar, registre o pagamento de novo no destino, na aba Fatura.');},300);
+    return;
+  }
   if(item){item.contaBancariaId=sel.value||'';saveState();flashSave();}
   if(tipo==='entrada')renderEntradas();
   else{renderDespesasTipo('credito');renderDespesasTipo('debito');}
